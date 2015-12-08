@@ -66,6 +66,7 @@ subprojects {
             java = 'SLASHSTAR_STYLE'
             groovy = 'SLASHSTAR_STYLE'
         }
+        excludes(["**/DateAxis.java"])
     }
 
     sourceCompatibility = JavaVersion.VERSION_1_8
