@@ -1,0 +1,5 @@
+rootProject.name = 'chronix.examples'
+
+//A simple ui for time series exploration using the Chronix Server and Chronix Kassiopeia
+include 'chronix-timeseries-exploration'
+
