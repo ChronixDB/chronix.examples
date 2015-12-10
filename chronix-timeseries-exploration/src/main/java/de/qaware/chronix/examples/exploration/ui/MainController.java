@@ -105,11 +105,11 @@ public class MainController implements Initializable {
             @Override
             public Void call() {
 
-                LOGGER.info("Setting up Chronix with an remote solr to url {}", solrUrl);
+                LOGGER.info("Setting up Chronix with a remote Solr to URL {}", solrUrl);
                 solr = new HttpSolrClient(solrUrl);
 
                 boolean solrAvailable = solrAvailable();
-                LOGGER.info("Checking connection to solr. Result {}", solrAvailable);
+                LOGGER.info("Checking connection to Solr. Result {}", solrAvailable);
 
                 if (solrAvailable) {
                     Platform.runLater(() -> connectedState.setFill(Color.GREEN));
@@ -122,6 +122,9 @@ public class MainController implements Initializable {
                 Function<MetricTimeSeries, String> groupBy = MainController.this::join;
 
                 BinaryOperator<MetricTimeSeries> reduce = (timeSeries, timeSeries2) -> {
+                    if (timeSeries == null || timeSeries2 == null) {
+                        return new MetricTimeSeries.Builder("empty").build();
+                    }
                     timeSeries.addAll(timeSeries2.getPoints());
                     return timeSeries;
                 };
@@ -159,7 +162,7 @@ public class MainController implements Initializable {
                 long queryStart = System.currentTimeMillis();
                 List<MetricTimeSeries> result = chronix.stream(solr, query).collect(Collectors.toList());
                 long queryEnd = System.currentTimeMillis();
-                LOGGER.info("Query took: {} ms", (queryEnd - queryStart));
+                LOGGER.info("Query took: {} ms for {} points", (queryEnd - queryStart), size(result));
 
                 queryStart = System.currentTimeMillis();
                 result.forEach(ts -> {
@@ -176,6 +179,13 @@ public class MainController implements Initializable {
         };
         new Thread(task).start();
 
+    }
+
+    private int size(List<MetricTimeSeries> result) {
+        if (result == null) {
+            return 0;
+        }
+        return result.stream().mapToInt(MetricTimeSeries::size).sum();
     }
 
     private void convertTsToSeries(MetricTimeSeries ts, XYChart.Series<DateAxis, NumberAxis> series) {
@@ -202,6 +212,9 @@ public class MainController implements Initializable {
     }
 
     private String join(MetricTimeSeries ts) {
+        if (ts == null) {
+            return "";
+        }
         return String.valueOf(ts.attribute("host")) + "-" +
                 ts.attribute("source") + "-" +
                 ts.attribute("group") + "-" +
