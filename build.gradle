@@ -60,6 +60,8 @@ subprojects {
     apply plugin: 'com.gradle.plugin-publish'
     apply plugin: 'com.jfrog.bintray'
 
+    version = 0.1
+
     license {
         includes(["**/*.java", "**/*.groovy"])
         mapping {
