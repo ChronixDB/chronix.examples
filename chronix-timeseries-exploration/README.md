@@ -18,8 +18,8 @@ That should be easy ;-).
 
 Then download, unzip and start  the [Chronix Server](https://github.com/ChronixDB/chronix.server/releases/tag/v0.0.2).
 ```
-wget https://github.com/ChronixDB/chronix.server/releases/download/v0.0.2/chronix-0.0.2.zip
-unzip chronix-0.0.2.zip
+wget https://github.com/ChronixDB/chronix.server/releases/download/v0.1/chronix-0.1.zip
+unzip chronix-0.1.zip
 
 ./chronix-solr-5.3.1/bin/solr start
 Waiting up to 30 seconds to see Solr running on port 8983 [|]  
