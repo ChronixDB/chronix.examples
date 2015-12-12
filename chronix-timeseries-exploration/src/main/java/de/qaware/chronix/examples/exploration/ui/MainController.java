@@ -17,11 +17,11 @@ package de.qaware.chronix.examples.exploration.ui;
 
 import de.qaware.chronix.ChronixClient;
 import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
-import de.qaware.chronix.dts.MetricDataPoint;
 import de.qaware.chronix.examples.exploration.ui.dt.DateAxis;
 import de.qaware.chronix.examples.exploration.ui.log.TextAreaLogger;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
+import de.qaware.chronix.timeseries.Pair;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -50,6 +50,7 @@ import java.util.ResourceBundle;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Main controller for our simple example ui
@@ -125,14 +126,23 @@ public class MainController implements Initializable {
                     if (timeSeries == null || timeSeries2 == null) {
                         return new MetricTimeSeries.Builder("empty").build();
                     }
-                    timeSeries.addAll(timeSeries2.getPoints());
-                    return timeSeries;
+                    MetricTimeSeries.Builder reduced = new MetricTimeSeries.Builder(timeSeries.getMetric())
+                            .attributes(timeSeries.attributes())
+                            .data(concat(timeSeries.getTimestamps(), timeSeries2.getTimestamps()),
+                                    concat(timeSeries.getValues(), timeSeries2.getValues()));
+
+                    return reduced.build();
                 };
+
 
                 chronix = new ChronixClient<>(new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
 
                 return null;
+            }
+
+            private <T> List<T> concat(Stream<T> first, Stream<T> second) {
+                return Stream.concat(first, second).collect(Collectors.toList());
             }
         };
 
@@ -189,21 +199,21 @@ public class MainController implements Initializable {
     }
 
     private void convertTsToSeries(MetricTimeSeries ts, XYChart.Series<DateAxis, NumberAxis> series) {
-        MetricDataPoint former = null;
+        Pair former = null;
 
-        List<MetricDataPoint> points = ts.getPoints();
+        List<Pair> points = ts.points().collect(Collectors.toList());
         //reduce the amount shown in the chart
         for (int i = 0; i < points.size(); i++) {
-            MetricDataPoint point = points.get(i);
+            Pair point = points.get(i);
             if (former != null && former.getValue() != point.getValue()) {
-                series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getDate()), point.getValue()));
+                series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
 
             }
             //Little hack.  The line chart does not show points
             if (i == points.size() - 1) {
-                series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getDate()), point.getValue()));
+                series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
                 if (series.getData().size() == 1) {
-                    series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getDate() + 1), point.getValue()));
+                    series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp() + 1), point.getValue()));
                 }
 
             }
