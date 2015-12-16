@@ -13,7 +13,7 @@ dependencies {
     //Solr need commons logging
     compile 'commons-logging:commons-logging:1.2'
 
-    compile 'de.qaware.chronix:chronix-api:0.0.2'
+    compile 'de.qaware.chronix:chronix-api:0.1'
     compile 'de.qaware.chronix:chronix-server-client:0.1'
     compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1'
     compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1'
