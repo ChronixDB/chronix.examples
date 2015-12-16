@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ChronixDB/chronix.examples.svg?branch=master)](https://travis-ci.org/ChronixDB/chronix.examples)
 # The Chronix Examples Repository
 The repository contains some example showcases of Chronix.
 
