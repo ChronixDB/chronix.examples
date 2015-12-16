@@ -34,8 +34,6 @@ allprojects {
     apply plugin: 'jacoco'
     apply plugin: 'com.github.kt3k.coveralls'
 
-
-
     group 'de.qaware.chronix'
 
     repositories {
@@ -55,10 +53,10 @@ subprojects {
     apply plugin: 'base'
     apply plugin: 'groovy'
     apply plugin: 'java'
-    apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'maven-publish'
     apply plugin: 'com.gradle.plugin-publish'
     apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'com.github.hierynomus.license'
 
     version = 0.1
 
@@ -153,6 +151,6 @@ tasks.coveralls {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
+    gradleVersion = '2.2'
 }
 
