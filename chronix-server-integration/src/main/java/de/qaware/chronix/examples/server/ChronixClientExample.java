@@ -1,4 +1,4 @@
-package de.qaware.chronix.examples.server;/*
+/*
  * Copyright (C) 2015 QAware GmbH
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@ package de.qaware.chronix.examples.server;/*
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+package de.qaware.chronix.examples.server;
 
 import de.qaware.chronix.ChronixClient;
 import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
