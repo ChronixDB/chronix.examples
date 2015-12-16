@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/ChronixDB/chronix.examples.svg?branch=master)](https://travis-ci.org/ChronixDB/chronix.examples)
+[![Apache License 2](http://img.shields.io/badge/license-ASF2-blue.svg)](https://github.com/ChronixDB/chronix.examples/blob/master/LICENSE)
+
 # The Chronix Examples Repository
 The repository contains some example showcases of Chronix.
 
