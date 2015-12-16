@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/chronix-server-integration/chronix-server-integration.iml" filepath="$PROJECT_DIR$/chronix-server-integration/chronix-server-integration.iml" />
       <module fileurl="file://$PROJECT_DIR$/chronix-timeseries-exploration/chronix-timeseries-exploration.iml" filepath="$PROJECT_DIR$/chronix-timeseries-exploration/chronix-timeseries-exploration.iml" />
       <module fileurl="file://$PROJECT_DIR$/chronix.examples.iml" filepath="$PROJECT_DIR$/chronix.examples.iml" />
     </modules>

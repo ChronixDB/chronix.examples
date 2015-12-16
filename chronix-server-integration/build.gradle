@@ -13,37 +13,25 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://dl.bintray.com/chronix/maven"
+    }
+}
+
 dependencies {
 
-    //SLF4J interface
+    //Some logging stuff
     compile 'org.slf4j:slf4j-api:1.7.12'
-
-    //We use log4j2
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.4'
     compile 'org.apache.logging.log4j:log4j-api:2.4'
     compile 'org.apache.logging.log4j:log4j-core:2.4'
 
-    //Chronix libs
-    compile 'org.apache.solr:solr-solrj:5.3.1'
-    //Solr need commons logging
-    compile 'commons-logging:commons-logging:1.2'
-
+    //Chronix
     compile 'de.qaware.chronix:chronix-api:0.1'
     compile 'de.qaware.chronix:chronix-server-client:0.1'
     compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1'
     compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1'
-}
-
-
-jar {
-
-    manifest {
-        attributes "Main-Class": "de.qaware.chronix.examples.exploration.ui.MainRunner"
-    }
-
-    from {
-        configurations.compile.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
 }
