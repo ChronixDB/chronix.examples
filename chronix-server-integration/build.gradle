@@ -31,7 +31,11 @@ dependencies {
 
     //Chronix
     compile 'de.qaware.chronix:chronix-api:0.1'
-    compile 'de.qaware.chronix:chronix-server-client:0.1'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1'
+    compile 'de.qaware.chronix:chronix-server-client:0.1.1'
+    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1.1'
+    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1.1'
+
+    //Solr
+    compile 'org.apache.solr:solr-solrj:5.4.0'
+
 }
