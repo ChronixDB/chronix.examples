@@ -19,6 +19,8 @@ import de.qaware.chronix.ChronixClient;
 import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
+import de.qaware.chronix.timeseries.dt.DoubleList;
+import de.qaware.chronix.timeseries.dt.LongList;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -29,7 +31,6 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * An example showcase of how to integrate chronix into your application.
@@ -79,14 +80,20 @@ public class ChronixClientExample {
             sb.append("metric:[")
                     .append(ts.getMetric())
                     .append("] with value: [")
-                    .append(ts.getValues().collect(Collectors.toList()))
+                    .append(ts.getValues())
                     .append("]")
                     .append("\n");
         }
         return sb.toString();
     }
 
-    private static <T> List<T> concat(Stream<T> timestamps, Stream<T> timestamps1) {
-        return Stream.concat(timestamps, timestamps1).collect(Collectors.toList());
+    private static LongList concat(LongList first, LongList second) {
+        first.addAll(second);
+        return first;
     }
+    private static DoubleList concat(DoubleList first, DoubleList second) {
+        first.addAll(second);
+        return first;
+    }
+
 }

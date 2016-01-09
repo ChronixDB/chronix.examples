@@ -21,7 +21,9 @@ import de.qaware.chronix.examples.exploration.ui.dt.DateAxis;
 import de.qaware.chronix.examples.exploration.ui.log.TextAreaLogger;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
-import de.qaware.chronix.timeseries.Pair;
+import de.qaware.chronix.timeseries.dt.DoubleList;
+import de.qaware.chronix.timeseries.dt.LongList;
+import de.qaware.chronix.timeseries.dt.Pair;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -50,7 +52,6 @@ import java.util.ResourceBundle;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Main controller for our simple example ui
@@ -141,8 +142,14 @@ public class MainController implements Initializable {
                 return null;
             }
 
-            private <T> List<T> concat(Stream<T> first, Stream<T> second) {
-                return Stream.concat(first, second).collect(Collectors.toList());
+            private LongList concat(LongList first, LongList second) {
+                first.addAll(second);
+                return first;
+            }
+
+            private DoubleList concat(DoubleList first, DoubleList second) {
+                first.addAll(second);
+                return first;
             }
         };
 
