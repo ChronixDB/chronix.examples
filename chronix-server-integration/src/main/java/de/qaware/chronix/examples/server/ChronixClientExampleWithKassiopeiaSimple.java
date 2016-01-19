@@ -33,15 +33,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * An example showcase of how to integrate chronix into your application.
- * Works with the release 0.1 of the chronix-server
- * Download at <a href="https://github.com/ChronixDB/chronix.server/releases/download/v0.1/chronix-0.1.zip">chronix-server-0.1</a>
+ * An example showcase of how to integrate chronix into your application using kassiopeia-simple
+ * Works with the release 0.1.1 of the chronix-server
+ * Download at <a href="https://github.com/ChronixDB/chronix.server/releases/download/v0.1.1/chronix-0.1.1.zip">chronix-server-0.1.1</a>
  *
  * @author f.lautenschlager
  */
-public class ChronixClientExample {
+public class ChronixClientExampleWithKassiopeiaSimple {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChronixClientExample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChronixClientExampleWithKassiopeiaSimple.class);
+
 
     public static void main(String[] args) {
         SolrClient solr = new HttpSolrClient("http://localhost:8983/solr/chronix/");
@@ -91,6 +92,7 @@ public class ChronixClientExample {
         first.addAll(second);
         return first;
     }
+
     private static DoubleList concat(DoubleList first, DoubleList second) {
         first.addAll(second);
         return first;
