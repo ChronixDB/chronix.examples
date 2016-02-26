@@ -54,7 +54,7 @@ public class ChronixClientExampleWithKassiopeiaSimple {
         BinaryOperator<MetricTimeSeries> reduce = (ts1, ts2) -> {
             MetricTimeSeries.Builder reduced = new MetricTimeSeries
                     .Builder(ts1.getMetric())
-                    .data(concat(ts1.getTimestamps(), ts2.getTimestamps()),
+                    .points(concat(ts1.getTimestamps(), ts2.getTimestamps()),
                             concat(ts1.getValues(), ts2.getValues()))
                     .attributes(ts2.attributes());
             return reduced.build();
