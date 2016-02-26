@@ -39,7 +39,7 @@ public class MainRunner extends Application {
     /**
      * Runs the example. The application checks the args of the following parameter: 'solrUrl'
      *
-     * @param args
+     * @param args the first argument is the solr url
      */
     public static void main(String[] args) {
         if (args.length == 1) {

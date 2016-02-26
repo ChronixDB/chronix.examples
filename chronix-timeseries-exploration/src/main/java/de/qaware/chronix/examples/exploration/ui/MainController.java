@@ -23,7 +23,7 @@ import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
 import de.qaware.chronix.timeseries.dt.DoubleList;
 import de.qaware.chronix.timeseries.dt.LongList;
-import de.qaware.chronix.timeseries.dt.Pair;
+import de.qaware.chronix.timeseries.dt.Point;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -129,7 +129,7 @@ public class MainController implements Initializable {
                     }
                     MetricTimeSeries.Builder reduced = new MetricTimeSeries.Builder(timeSeries.getMetric())
                             .attributes(timeSeries.attributes())
-                            .data(concat(timeSeries.getTimestamps(), timeSeries2.getTimestamps()),
+                            .points(concat(timeSeries.getTimestamps(), timeSeries2.getTimestamps()),
                                     concat(timeSeries.getValues(), timeSeries2.getValues()));
 
                     return reduced.build();
@@ -206,12 +206,12 @@ public class MainController implements Initializable {
     }
 
     private void convertTsToSeries(MetricTimeSeries ts, XYChart.Series<DateAxis, NumberAxis> series) {
-        Pair former = null;
+        Point former = null;
 
-        List<Pair> points = ts.points().collect(Collectors.toList());
+        List<Point> points = ts.points().collect(Collectors.toList());
         //reduce the amount shown in the chart
         for (int i = 0; i < points.size(); i++) {
-            Pair point = points.get(i);
+            Point point = points.get(i);
             if (former != null && former.getValue() != point.getValue()) {
                 series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
 
