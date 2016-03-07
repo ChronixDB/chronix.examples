@@ -21,8 +21,6 @@ import de.qaware.chronix.examples.exploration.ui.dt.DateAxis;
 import de.qaware.chronix.examples.exploration.ui.log.TextAreaLogger;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
-import de.qaware.chronix.timeseries.dt.DoubleList;
-import de.qaware.chronix.timeseries.dt.LongList;
 import de.qaware.chronix.timeseries.dt.Point;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -47,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.BinaryOperator;
@@ -127,29 +126,13 @@ public class MainController implements Initializable {
                     if (timeSeries == null || timeSeries2 == null) {
                         return new MetricTimeSeries.Builder("empty").build();
                     }
-                    MetricTimeSeries.Builder reduced = new MetricTimeSeries.Builder(timeSeries.getMetric())
-                            .attributes(timeSeries.attributes())
-                            .points(concat(timeSeries.getTimestamps(), timeSeries2.getTimestamps()),
-                                    concat(timeSeries.getValues(), timeSeries2.getValues()));
-
-                    return reduced.build();
+                    timeSeries.addAll(timeSeries2.getTimestampsAsArray(), timeSeries2.getValuesAsArray());
+                    return timeSeries;
                 };
-
 
                 chronix = new ChronixClient<>(new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
-
                 return null;
-            }
-
-            private LongList concat(LongList first, LongList second) {
-                first.addAll(second);
-                return first;
-            }
-
-            private DoubleList concat(DoubleList first, DoubleList second) {
-                first.addAll(second);
-                return first;
             }
         };
 
@@ -180,7 +163,6 @@ public class MainController implements Initializable {
                 List<MetricTimeSeries> result = chronix.stream(solr, query).collect(Collectors.toList());
                 long queryEnd = System.currentTimeMillis();
                 LOGGER.info("Query took: {} ms for {} points", (queryEnd - queryStart), size(result));
-
                 queryStart = System.currentTimeMillis();
                 result.forEach(ts -> {
                     XYChart.Series<DateAxis, NumberAxis> series = new XYChart.Series<>();
@@ -206,25 +188,26 @@ public class MainController implements Initializable {
     }
 
     private void convertTsToSeries(MetricTimeSeries ts, XYChart.Series<DateAxis, NumberAxis> series) {
-        Point former = null;
-
-        List<Point> points = ts.points().collect(Collectors.toList());
-        //reduce the amount shown in the chart
+        ts.sort();
+        List<Point> points;
+        if (ts.size() > 200_000) {
+            points = ts.points().filter(point -> point.getIndex() % 1000 == 0).collect(Collectors.toList());
+        } else {
+            points = ts.points().collect(Collectors.toList());
+        }
+        //reduce the amount shown in the chart we add every 100ths point
         for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
-            if (former != null && former.getValue() != point.getValue()) {
-                series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
 
-            }
-            //Little hack.  The line chart does not show points
+            series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
+
+            //If the chart only has one point than we add the same value, but 1 week in the future
             if (i == points.size() - 1) {
-                series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
                 if (series.getData().size() == 1) {
-                    series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp() + 1), point.getValue()));
+                    Instant futureTimestamp = Instant.ofEpochMilli(point.getTimestamp()).plus(1, ChronoUnit.DAYS);
+                    series.getData().add(new XYChart.Data(futureTimestamp, point.getValue()));
                 }
-
             }
-            former = point;
         }
     }
 
