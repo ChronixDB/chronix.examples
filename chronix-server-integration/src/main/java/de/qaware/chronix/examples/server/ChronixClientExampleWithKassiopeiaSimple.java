@@ -52,12 +52,11 @@ public class ChronixClientExampleWithKassiopeiaSimple {
 
         //Define a reduce function for the grouped time series records
         BinaryOperator<MetricTimeSeries> reduce = (ts1, ts2) -> {
-            MetricTimeSeries.Builder reduced = new MetricTimeSeries
-                    .Builder(ts1.getMetric())
-                    .points(concat(ts1.getTimestamps(), ts2.getTimestamps()),
-                            concat(ts1.getValues(), ts2.getValues()))
-                    .attributes(ts2.attributes());
-            return reduced.build();
+            if (ts1 == null || ts2 == null) {
+                return new MetricTimeSeries.Builder("empty").build();
+            }
+            ts1.addAll(ts2.getTimestampsAsArray(), ts2.getValuesAsArray());
+            return ts1;
         };
         //Instantiate a Chronix Client
         ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> chronix = new ChronixClient<>(
