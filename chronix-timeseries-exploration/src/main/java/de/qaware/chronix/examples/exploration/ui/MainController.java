@@ -194,7 +194,7 @@ public class MainController implements Initializable {
                 XYChart.Series<DateAxis, NumberAxis> series = new XYChart.Series<>();
 
                 //function name
-                String name = splits[2];
+                String name = splits[1];
                 series.setName(join(ts) + "-" + name);
 
                 //function value
@@ -207,19 +207,7 @@ public class MainController implements Initializable {
                         points = ts.points().collect(Collectors.toList());
                     }
                     //reduce the amount shown in the chart we add every 100ths point
-                    for (int i = 0; i < points.size(); i++) {
-                        Point point = points.get(i);
-
-                        series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
-
-                        //If the chart only has one point than we add the same value, but 1 week in the future
-                        if (i == points.size() - 1) {
-                            if (series.getData().size() == 1) {
-                                Instant futureTimestamp = Instant.ofEpochMilli(point.getTimestamp()).plus(1, ChronoUnit.DAYS);
-                                series.getData().add(new XYChart.Data(futureTimestamp, point.getValue()));
-                            }
-                        }
-                    }
+                    addPointsToSeries(series, points);
                     Platform.runLater(() -> chart.getData().add(series));
 
 
@@ -243,6 +231,22 @@ public class MainController implements Initializable {
 
     }
 
+    private void addPointsToSeries(XYChart.Series<DateAxis, NumberAxis> series, List<Point> points) {
+        for (int i = 0; i < points.size(); i++) {
+            Point point = points.get(i);
+
+            series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
+
+            //If the chart only has one point than we add the same value, but 1 week in the future
+            if (i == points.size() - 1) {
+                if (series.getData().size() == 1) {
+                    Instant futureTimestamp = Instant.ofEpochMilli(point.getTimestamp()).plus(1, ChronoUnit.DAYS);
+                    series.getData().add(new XYChart.Data(futureTimestamp, point.getValue()));
+                }
+            }
+        }
+    }
+
     private int size(List<MetricTimeSeries> result) {
         if (result == null) {
             return 0;
@@ -262,19 +266,7 @@ public class MainController implements Initializable {
             points = ts.points().collect(Collectors.toList());
         }
         //reduce the amount shown in the chart we add every 100ths point
-        for (int i = 0; i < points.size(); i++) {
-            Point point = points.get(i);
-
-            series.getData().add(new XYChart.Data(Instant.ofEpochMilli(point.getTimestamp()), point.getValue()));
-
-            //If the chart only has one point than we add the same value, but 1 week in the future
-            if (i == points.size() - 1) {
-                if (series.getData().size() == 1) {
-                    Instant futureTimestamp = Instant.ofEpochMilli(point.getTimestamp()).plus(1, ChronoUnit.DAYS);
-                    series.getData().add(new XYChart.Data(futureTimestamp, point.getValue()));
-                }
-            }
-        }
+        addPointsToSeries(series, points);
 
         Platform.runLater(() -> chart.getData().add(series));
 
