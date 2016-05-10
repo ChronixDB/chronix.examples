@@ -1,0 +1,9 @@
+dependencies {
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'commons-io:commons-io:2.5'
+
+    compile 'de.qaware.chronix:chronix-api:0.1'
+    compile 'de.qaware.chronix:chronix-server-client:0.2-beta-1'
+    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1.8-beta-4'
+    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1.8-beta-4'
+}
