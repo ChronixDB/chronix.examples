@@ -1,4 +1,19 @@
-package de.qaware.chronix.importer;
+/*
+ * Copyright (C) 2015 QAware GmbH
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+package de.qaware.chronix.importer.csv;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -18,27 +33,73 @@ import java.util.function.BiConsumer;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Created by f.lautenschlager on 10.06.2015.
+ * A generic csv file importer.
+ *
+ * @author f.lautenschlager
  */
 public class FileImporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileImporter.class);
 
     private static final String METRICS_FILE_PATH = "metrics.csv";
+    private final String dateFormat;
+    private final Locale numberLocal;
+    private final String csvDelimiter;
 
-    private FileImporter() {
+    private boolean longDate = false;
+    private boolean instantDate = false;
+    private boolean sdfDate = false;
+
+    /**
+     * Constructs a file importer
+     *
+     * @param dateFormat  the date format: long for ms since 1970, 'instant' for java 8 instant,
+     *                    otherwise simple date format
+     * @param numberLocal the number local, e.g. ENGLISH, GERMAN, ...
+     */
+    public FileImporter(String dateFormat, String numberLocal, String csvDelimiter) {
+        this.dateFormat = dateFormat;
+
+        if (dateFormat.equalsIgnoreCase("long")) {
+            longDate = true;
+        } else if (dateFormat.equalsIgnoreCase("instant")) {
+            instantDate = true;
+        } else {
+            sdfDate = true;
+        }
+
+        if (numberLocal.equalsIgnoreCase("german")) {
+            this.numberLocal = Locale.GERMAN;
+        } else {
+            this.numberLocal = Locale.ENGLISH;
+        }
+
+        this.csvDelimiter = csvDelimiter;
+
 
     }
 
-    @SafeVarargs
-    public static final Pair<Integer, Integer> importPoints(Map<Metadata, Pair<Instant, Instant>> points, File folder, BiConsumer<List<ImportPoint>, Metadata>... databases) {
+
+    /**
+     * Reads the given file / folder and calls the bi consumer with the extracted points
+     *
+     * @param points
+     * @param folder
+     * @param databases
+     * @return
+     */
+    public Pair<Integer, Integer> importPoints(Map<Attributes, Pair<Instant, Instant>> points, File folder, BiConsumer<List<ImportPoint>, Attributes>... databases) {
+
 
         final AtomicInteger pointCounter = new AtomicInteger(0);
         final AtomicInteger tsCounter = new AtomicInteger(0);
         final File metricsFile = new File(METRICS_FILE_PATH);
+
+        LOGGER.info("Writing imported metrics to {}", metricsFile);
+        LOGGER.info("Import supports csv files as well as gz compressed csv files.");
+
         try {
             final FileWriter metricsFileWriter = new FileWriter(metricsFile);
-
 
             Collection<File> files = new ArrayList<>();
             if (folder.isFile()) {
@@ -50,11 +111,9 @@ public class FileImporter {
             AtomicInteger counter = new AtomicInteger(0);
 
             files.parallelStream().forEach(file -> {
-                boolean onlyMinusOne = true;
-                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+                SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+                NumberFormat nf = DecimalFormat.getInstance(numberLocal);
 
-
-                NumberFormat nf = DecimalFormat.getInstance(Locale.ENGLISH);
                 InputStream inputStream = null;
                 BufferedReader reader = null;
                 try {
@@ -74,40 +133,35 @@ public class FileImporter {
                         return;
                     }
 
-
-                    //host _ process _ metricGroup
+                    //Extract the attributes from the file name
+                    //E.g. first_second_third_attribute.csv
                     String[] fileNameMetaData = file.getName().split("_");
-                    //build meta data object
-                    String host = fileNameMetaData[0];
-                    String process = fileNameMetaData[1];
-                    String metricGroup = fileNameMetaData[2];
-                    String measurement = file.getParentFile().getName();
 
 
-                    String[] metrics = headerLine.split(";");
+                    String[] metrics = headerLine.split(csvDelimiter);
 
-                    Map<Integer, Metadata> metadatas = new HashMap<>(metrics.length);
+                    Map<Integer, Attributes> attributesPerTimeSeries = new HashMap<>(metrics.length);
 
 
                     for (int i = 1; i < metrics.length; i++) {
                         String metric = metrics[i];
                         String metricOnlyAscii = Normalizer.normalize(metric, Normalizer.Form.NFD);
                         metricOnlyAscii = metric.replaceAll("[^\\x00-\\x7F]", "");
-                        Metadata metadata = new Metadata(host, process, metricGroup, metricOnlyAscii, measurement);
+                        Attributes attributes = new Attributes(metricOnlyAscii, fileNameMetaData);
 
                         //Check if meta data is completely set
-                        if (isEmpty(metadata)) {
+                        if (isEmpty(attributes)) {
                             boolean deleted = deleteFile(file, inputStream, reader);
-                            LOGGER.info("Metadata contains empty values {}. File {} deleted {}", metadata, file.getName(), deleted);
+                            LOGGER.info("Attributes contains empty values {}. File {} deleted {}", attributes, file.getName(), deleted);
                             continue;
                         }
 
-                        if (metadata.getMetric().equals(".*")) {
+                        if (attributes.getMetric().equals(".*")) {
                             boolean deleted = deleteFile(file, inputStream, reader);
-                            LOGGER.info("Metadata metric{}. File {} deleted {}", metadata.getMetric(), file.getName(), deleted);
+                            LOGGER.info("Attributes metric{}. File {} deleted {}", attributes.getMetric(), file.getName(), deleted);
                             continue;
                         }
-                        metadatas.put(i, metadata);
+                        attributesPerTimeSeries.put(i, attributes);
                         tsCounter.incrementAndGet();
 
                     }
@@ -115,42 +169,28 @@ public class FileImporter {
                     Map<Integer, List<ImportPoint>> dataPoints = new HashMap<>();
 
                     String line;
-                    boolean instantdate = true;
-                    boolean onlyOnce = true;
                     while ((line = reader.readLine()) != null) {
-                        String[] splits = line.split(";");
+                        String[] splits = line.split(csvDelimiter);
                         String date = splits[0];
 
-                        if (onlyOnce) {
-                            try {
-                                Instant.parse(date);
-                            } catch (Exception e) {
-                                instantdate = false;
-                            }
-                            onlyOnce = false;
-                        }
+
                         Instant dateObject;
-                        if (instantdate) {
+                        if (instantDate) {
                             dateObject = Instant.parse(date);
-                        } else {
+                        } else if (sdfDate) {
                             dateObject = sdf.parse(date).toInstant();
+                        } else {
+                            dateObject = Instant.ofEpochMilli(Long.valueOf(date));
                         }
 
 
-                        String[] values = splits;
+                        for (int column = 1; column < splits.length; column++) {
 
-                        for (int column = 1; column < values.length; column++) {
-
-                            String value = values[column];
+                            String value = splits[column];
                             double numericValue = nf.parse(value).doubleValue();
 
-                            ImportPoint point;
-                            if (instantdate) {
-                                point = new ImportPoint(dateObject, numericValue);
-                            } else {
-                                point = new ImportPoint(dateObject, numericValue);
+                            ImportPoint point = new ImportPoint(dateObject, numericValue);
 
-                            }
 
                             if (!dataPoints.containsKey(column)) {
                                 dataPoints.put(column, new ArrayList<>());
@@ -160,35 +200,24 @@ public class FileImporter {
                         }
 
                     }
-/*
-                    if (onlyMinusOne) {
-                        pointCounter.addAndGet(-dataPoints.size());
-                        tsCounter.decrementAndGet();
 
-                        //close all streams
-                        boolean deleted = deleteFile(file, inputStream, reader);
-                        LOGGER.info("{} contains only -1. Deleted {}", file.getName(), deleted);
-
-                        return;
-                    }
-                    */
 
                     dataPoints.values().forEach(Collections::sort);
 
                     IOUtils.closeQuietly(reader);
                     IOUtils.closeQuietly(inputStream);
 
-                    dataPoints.forEach((key, value) -> {
-                        for (BiConsumer<List<ImportPoint>, Metadata> database : databases) {
-                            database.accept(value, metadatas.get(key));
+                    dataPoints.forEach((key, importPoints) -> {
+                        for (BiConsumer<List<ImportPoint>, Attributes> database : databases) {
+                            database.accept(importPoints, attributesPerTimeSeries.get(key));
                         }
-                        points.put(metadatas.get(key), Pair.of(value.get(0).getDate(), value.get(value.size() - 1).getDate()));
+                        points.put(attributesPerTimeSeries.get(key), Pair.of(importPoints.get(0).getDate(), importPoints.get(importPoints.size() - 1).getDate()));
                         //write the stats to the file
-                        Instant start = value.get(0).getDate();
-                        Instant end = value.get(value.size() - 1).getDate();
+                        Instant start = importPoints.get(0).getDate();
+                        Instant end = importPoints.get(importPoints.size() - 1).getDate();
 
                         try {
-                            writeStatsLine(metricsFileWriter, metadatas.get(key), start, end);
+                            writeStatsLine(metricsFileWriter, attributesPerTimeSeries.get(key), start, end);
                         } catch (IOException e) {
                             LOGGER.error("Could not write stats line", e);
                         }
@@ -211,15 +240,14 @@ public class FileImporter {
         return Pair.of(tsCounter.get(), pointCounter.get());
     }
 
-    private static void writeStatsLine(FileWriter metricsFile, Metadata metadata, Instant start, Instant end) throws IOException {
+    private void writeStatsLine(FileWriter metricsFile, Attributes attributes, Instant start, Instant end) throws IOException {
         //host:process:metric-group:metric:start:end
         StringBuilder line = new StringBuilder();
-        line.append(metadata.getHost()).append(";")
-                .append(metadata.getProcess()).append(";")
-                .append(metadata.getMetricGroup()).append(";")
-                .append(metadata.getMetric()).append(";")
-                .append(start).append(";")
-                .append(end).append(";")
+        for (int i = 0; i < attributes.size(); i++) {
+            line.append(attributes.get(i)).append(csvDelimiter);
+        }
+        line.append(start).append(csvDelimiter)
+                .append(end).append(csvDelimiter)
                 .append("\n");
 
         metricsFile.write(line.toString());
@@ -227,7 +255,7 @@ public class FileImporter {
 
     }
 
-    private static boolean deleteFile(File file, InputStream inputStream, BufferedReader reader) {
+    private boolean deleteFile(File file, InputStream inputStream, BufferedReader reader) {
         IOUtils.closeQuietly(reader);
         IOUtils.closeQuietly(inputStream);
 
@@ -235,11 +263,16 @@ public class FileImporter {
         return file.delete();
     }
 
-    private static boolean isEmpty(Metadata metadata) {
-        return empty(metadata.getMetric()) || empty(metadata.getMetricGroup()) || empty(metadata.getProcess()) || empty(metadata.getHost());
+    private boolean isEmpty(Attributes attributes) {
+        for (int i = 0; i < attributes.size(); i++) {
+            if (empty(attributes.get(i))) {
+                return true;
+            }
+        }
+        return attributes.getMetric().isEmpty();
     }
 
-    private static boolean empty(String metric) {
+    private boolean empty(String metric) {
         return StringUtils.isEmpty(metric);
     }
 }
