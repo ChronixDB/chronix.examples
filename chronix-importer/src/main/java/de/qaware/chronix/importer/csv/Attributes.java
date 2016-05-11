@@ -15,6 +15,10 @@
  */
 package de.qaware.chronix.importer.csv;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * The attributes representation
  *
@@ -25,22 +29,70 @@ public class Attributes {
     private String[] attributes;
     private String metric;
 
-    public Attributes(String metric, String... attributes) {
+    /**
+     * Constructs the attributes
+     *
+     * @param metric     the metric is a required field
+     * @param attributes the arbitrary attributes
+     */
+    Attributes(String metric, String... attributes) {
         this.metric = metric;
         this.attributes = attributes;
-
     }
 
-
-    public String get(int i) {
+    /**
+     * Gets an attribute value
+     *
+     * @param i gets the attribute at position i
+     * @return the attribute value
+     */
+    String get(int i) {
         return attributes[i];
     }
 
-    public String getMetric() {
+    /**
+     * @return the metric
+     */
+    String getMetric() {
         return metric;
     }
 
-    public int size() {
+    /**
+     * @return the size / amount of the attributes
+     */
+    int size() {
         return attributes.length;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Attributes that = (Attributes) o;
+
+        return new EqualsBuilder()
+                .append(attributes, that.attributes)
+                .append(metric, that.metric)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(attributes)
+                .append(metric)
+                .toHashCode();
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("attributes", attributes)
+                .append("metric", metric)
+                .toString();
     }
 }

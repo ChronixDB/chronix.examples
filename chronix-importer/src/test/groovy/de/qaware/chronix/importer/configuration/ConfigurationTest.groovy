@@ -28,12 +28,13 @@ class ConfigurationTest extends Specification {
         when:
         def config = Configuration.load(filePath)
         then:
-        config.size() == 6
+        config.size() == 7
         config.get("chronix") == "http://localhost:8983/solr/chronix"
         config.get("dateFormat") == "dd.MM.yyyy HH:mm:ss.SSS"
         config.get("numberFormat") == "ENGLISH"
         config.get("attributeFields") == ["host", "group", "process"]
         config.get("onlyGenerateMetricsFile") == true
         config.get("csvDelimiter") == ";"
+        config.get("cleanImport") == true
     }
 }

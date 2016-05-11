@@ -23,10 +23,12 @@ import de.qaware.chronix.timeseries.MetricTimeSeries;
 import de.qaware.chronix.timeseries.dt.Point;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +83,12 @@ public class ChronixImporter {
      *
      * @return a BiConsumer handling the given list of import points and attributes
      */
-    public BiConsumer<List<ImportPoint>, Attributes> importToChronix() {
+    public BiConsumer<List<ImportPoint>, Attributes> importToChronix(boolean cleanImport) {
+
+        if (cleanImport) {
+            deleteIndex();
+        }
+
 
         return (importPoints, attributes) -> {
 
@@ -128,6 +135,14 @@ public class ChronixImporter {
 
     }
 
+    private void deleteIndex() {
+        try {
+            CHRONIX_SOLR_CLIENT.deleteByQuery("*:*");
+        } catch (SolrServerException | IOException e) {
+            LOGGER.error("Could not delete index due to an exception", e);
+        }
+    }
+
     private MetricTimeSeries.Builder getPrefilledTimeSeriesBuilder(Attributes attributes) {
         //String metric = metadata.joinWithoutMetric() + "." + metadata.getMetric();
         MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(attributes.getMetric());
@@ -135,5 +150,13 @@ public class ChronixImporter {
             builder.attribute(SCHEMA_FIELDS[i], attributes.get(i));
         }
         return builder;
+    }
+
+    public void commit() {
+        try {
+            CHRONIX_SOLR_CLIENT.commit();
+        } catch (SolrServerException | IOException e) {
+            LOGGER.error("Could not delete index due to an exception", e);
+        }
     }
 }

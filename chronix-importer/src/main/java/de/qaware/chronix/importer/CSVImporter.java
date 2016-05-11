@@ -70,6 +70,7 @@ public class CSVImporter {
         String csvDelimiter = (String) config.get("csvDelimiter");
         String url = (String) config.get("chronix");
         String[] attributeFields = ((List<String>) config.get("attributeFields")).toArray(new String[0]);
+        boolean cleanImport = (boolean) config.get("cleanImport");
 
         Map<Attributes, Pair<Instant, Instant>> importStatistics = new HashMap<>();
         ChronixImporter chronixImporter = new ChronixImporter(url, attributeFields);
@@ -80,8 +81,10 @@ public class CSVImporter {
         if (onlyMetricsFile) {
             result = importer.importPoints(importStatistics, timeSeriesFiles, chronixImporter.doNothing());
         } else {
-            result = importer.importPoints(importStatistics, timeSeriesFiles, chronixImporter.importToChronix());
+            result = importer.importPoints(importStatistics, timeSeriesFiles, chronixImporter.importToChronix(cleanImport));
         }
+        LOGGER.info("Done importing. Trigger commit.");
+        chronixImporter.commit();
 
 
         LOGGER.info("Import done. Imported {} time series with {} points", result.getFirst(), result.getSecond());

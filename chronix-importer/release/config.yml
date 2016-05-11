@@ -24,4 +24,9 @@ attributeFields:
 
 #Will parse the csv files without importing them.
 #Only generates the metrics.csv file
-onlyGenerateMetricsFile: true
+#valid values: true / false
+onlyGenerateMetricsFile: false
+
+
+#Will delete old metrics before new metrics are imported
+cleanImport: true
