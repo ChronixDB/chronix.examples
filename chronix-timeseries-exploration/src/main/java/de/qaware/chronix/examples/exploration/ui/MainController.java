@@ -123,9 +123,6 @@ public class MainController implements Initializable {
                 Function<MetricTimeSeries, String> groupBy = MainController.this::join;
 
                 BinaryOperator<MetricTimeSeries> reduce = (timeSeries, timeSeries2) -> {
-                    if (timeSeries == null || timeSeries2 == null) {
-                        return new MetricTimeSeries.Builder("empty").build();
-                    }
                     timeSeries.addAll(timeSeries2.getTimestampsAsArray(), timeSeries2.getValuesAsArray());
                     return timeSeries;
                 };
@@ -154,9 +151,14 @@ public class MainController implements Initializable {
                 });
 
                 SolrQuery query = new SolrQuery(queryString);
+                boolean hasFilterQueries = !fq.isEmpty();
 
-                if (!fq.isEmpty()) {
+                if (hasFilterQueries) {
                     query.addFilterQuery(fq);
+
+                    if (fq.contains("analysis=")) {
+                        query.addField("+data");
+                    }
                 }
 
                 long queryStart = System.currentTimeMillis();
@@ -165,11 +167,12 @@ public class MainController implements Initializable {
                 LOGGER.info("Query took: {} ms for {} points", (queryEnd - queryStart), size(result));
                 queryStart = System.currentTimeMillis();
                 result.forEach(ts -> {
-                    XYChart.Series<DateAxis, NumberAxis> series = new XYChart.Series<>();
-                    series.setName(join(ts));
 
-                    convertTsToSeries(ts, series);
-                    Platform.runLater(() -> chart.getData().add(series));
+                    if (hasFilterQueries) {
+                        convertAggregationOrAnalysisTs(ts, fq.contains("analysis="));
+                    } else {
+                        convertTsToSeries(ts);
+                    }
                 });
                 queryEnd = System.currentTimeMillis();
                 LOGGER.info("Charting took: {} ms", (queryEnd - queryStart));
@@ -180,22 +183,55 @@ public class MainController implements Initializable {
 
     }
 
-    private int size(List<MetricTimeSeries> result) {
-        if (result == null) {
-            return 0;
-        }
-        return result.stream().mapToInt(MetricTimeSeries::size).sum();
+    private void convertAggregationOrAnalysisTs(MetricTimeSeries ts, boolean analysis) {
+
+        //find the aggregations / and analyses
+
+        ts.getAttributesReference().forEach((key, value) -> {
+            //we have function value
+            if (key.contains("function") && !key.contains("arguments")) {
+                String[] splits = key.split("_");
+                XYChart.Series<DateAxis, NumberAxis> series = new XYChart.Series<>();
+
+                //function name
+                String name = splits[1];
+                series.setName(join(ts) + "-" + name);
+
+                //function value
+                if (analysis) {
+                    ts.sort();
+                    List<Point> points;
+                    if (ts.size() > 200_000) {
+                        points = ts.points().filter(point -> point.getIndex() % 1000 == 0).collect(Collectors.toList());
+                    } else {
+                        points = ts.points().collect(Collectors.toList());
+                    }
+                    //reduce the amount shown in the chart we add every 100ths point
+                    addPointsToSeries(series, points);
+                    Platform.runLater(() -> chart.getData().add(series));
+
+
+                } else {
+                    Instant start = Instant.ofEpochMilli(ts.getStart());
+                    Instant end = Instant.ofEpochMilli(ts.getEnd());
+
+                    series.getData().add(new XYChart.Data(start, value));
+                    series.getData().add(new XYChart.Data(end, value));
+                    Platform.runLater(() -> chart.getData().add(series));
+                }
+
+
+            } else {
+                //function arguments
+                //currently ignored
+            }
+
+
+        });
+
     }
 
-    private void convertTsToSeries(MetricTimeSeries ts, XYChart.Series<DateAxis, NumberAxis> series) {
-        ts.sort();
-        List<Point> points;
-        if (ts.size() > 200_000) {
-            points = ts.points().filter(point -> point.getIndex() % 1000 == 0).collect(Collectors.toList());
-        } else {
-            points = ts.points().collect(Collectors.toList());
-        }
-        //reduce the amount shown in the chart we add every 100ths point
+    private void addPointsToSeries(XYChart.Series<DateAxis, NumberAxis> series, List<Point> points) {
         for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
 
@@ -209,6 +245,31 @@ public class MainController implements Initializable {
                 }
             }
         }
+    }
+
+    private int size(List<MetricTimeSeries> result) {
+        if (result == null) {
+            return 0;
+        }
+        return result.stream().mapToInt(MetricTimeSeries::size).sum();
+    }
+
+    private void convertTsToSeries(MetricTimeSeries ts) {
+        XYChart.Series<DateAxis, NumberAxis> series = new XYChart.Series<>();
+        series.setName(join(ts));
+
+        ts.sort();
+        List<Point> points;
+        if (ts.size() > 200_000) {
+            points = ts.points().filter(point -> point.getIndex() % 1000 == 0).collect(Collectors.toList());
+        } else {
+            points = ts.points().collect(Collectors.toList());
+        }
+        //reduce the amount shown in the chart we add every 100ths point
+        addPointsToSeries(series, points);
+
+        Platform.runLater(() -> chart.getData().add(series));
+
     }
 
     private String join(MetricTimeSeries ts) {

@@ -1,0 +1,34 @@
+dependencies {
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'commons-io:commons-io:2.5'
+    compile 'org.yaml:snakeyaml:1.17'
+
+    compile 'de.qaware.chronix:chronix-api:0.1'
+    compile 'de.qaware.chronix:chronix-server-client:0.2-beta-1'
+    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1.8-beta-4'
+    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1.8-beta-4'
+
+    //Testing
+    testCompile 'org.codehaus.groovy:groovy-all:2.4.6'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'cglib:cglib-nodep:3.2.0'
+    testCompile 'org.objenesis:objenesis:2.2'
+}
+
+jar {
+
+    manifest {
+        attributes "Main-Class": "de.qaware.chronix.importer.CSVImporter"
+    }
+
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+task buildRelease(type: Copy) {
+    into "$projectDir/release/lib"
+    from "$buildDir/libs/chronix-importer-0.2-beta-1.jar"
+}
