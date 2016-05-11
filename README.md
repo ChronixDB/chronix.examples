@@ -4,6 +4,9 @@
 # The Chronix Examples Repository
 The repository contains some example showcases of Chronix.
 
+## Chronix CSV Importer [Jump To](https://github.com/ChronixDB/chronix.examples/tree/master/chronix-importer)
+A generic time series csv importer that allows one to store them in Chronix.
+
 ## Chronix Server Integration [Jump To](https://github.com/ChronixDB/chronix.examples/tree/master/chronix-server-integration)
 Shows how to plug the Chronix Server into your application.
 
