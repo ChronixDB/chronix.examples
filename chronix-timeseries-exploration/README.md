@@ -23,7 +23,7 @@ Then download, unzip and start  the [Chronix Server](https://github.com/ChronixD
 wget https://github.com/ChronixDB/chronix.server/releases/download/0.2/chronix-0.2.zip
 unzip chronix-0.2.zip
 
-./chronix-solr-6.0.4/bin/solr start
+./chronix-solr-6.0.1/bin/solr start
 Waiting up to 30 seconds to see Solr running on port 8983 [|]  
 Started Solr server on port 8983 (pid=2504). Happy searching!
 ```
