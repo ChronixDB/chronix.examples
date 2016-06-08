@@ -3,7 +3,9 @@ This example shows how Chronix can be plugged into a rich client application.
 The example is a simple ui with a line chart and a two text fields for enter Chronix range and analysis queries.
 It uses a central Chronix Server to query the time series. 
 ##### Screenshot of the JavaFX Example
-![Image of Chronix JavaFX Example](https://bintray.com/artifact/download/chronix/Images/2015-11-25%2016_08_50-Chronix%20JavaFX%20Example.png)
+![Image of Chronix JavaFX Example](https://raw.githubusercontent.com/ChronixDB/chronix.examples/master/img/Chart-0.2.png)
+
+![Image of Chronix JavaFX Example](https://raw.githubusercontent.com/ChronixDB/chronix.examples/master/img/Result-0.2.png)
 
 ## How to start?
 To start you have to do a few steps:
