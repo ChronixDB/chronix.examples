@@ -62,7 +62,7 @@ The second text area is for filter queries (e.g. analyses like ag=max, analysis=
 #Get the average load (metric) on day 28.08.2013
 Range Query: metric:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
 
-#Get the maximum of the load (metric) on day 28.08.2013
+#Get the maximum, minimum, average of the load (metric) on day 28.08.2013
 Range Query: metric:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
-Filter Query: ag=max
+Filter Query: function=max;min;avg
 ```
