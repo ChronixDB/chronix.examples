@@ -17,10 +17,10 @@ package de.qaware.chronix.examples.server;
 
 import de.qaware.chronix.ChronixClient;
 import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
+import de.qaware.chronix.converter.common.DoubleList;
+import de.qaware.chronix.converter.common.LongList;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
-import de.qaware.chronix.timeseries.dt.DoubleList;
-import de.qaware.chronix.timeseries.dt.LongList;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 /**
  * An example showcase of how to integrate chronix into your application using kassiopeia-simple
- * Works with the release 0.1.1 of the chronix-server
+ * Works with the release 0.2 of the chronix-server
  * Download at <a href="https://github.com/ChronixDB/chronix.server/releases/download/v0.1.1/chronix-0.1.1.zip">chronix-server-0.1.1</a>
  *
  * @author f.lautenschlager
@@ -64,7 +64,7 @@ public class ChronixClientExampleWithKassiopeiaSimple {
 
         //We want the maximum of all time series that metric matches *load*.
         SolrQuery query = new SolrQuery("metric:*Load*");
-        query.addFilterQuery("ag=max");
+        query.addFilterQuery("function=max");
 
         //The result is a Java Stream. We simply collect the result into a list.
         List<MetricTimeSeries> maxTS = chronix.stream(solr, query).collect(Collectors.toList());

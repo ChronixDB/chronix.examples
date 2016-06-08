@@ -16,12 +16,12 @@ To start you have to do a few steps:
 First ensure that you have a Java 8 runtime environment in your PATH. 
 That should be easy ;-).
 
-Then download, unzip and start  the [Chronix Server](https://github.com/ChronixDB/chronix.server/releases/tag/v0.0.2).
+Then download, unzip and start  the [Chronix Server](https://github.com/ChronixDB/chronix.server/releases/tag/0.2).
 ```
-wget https://github.com/ChronixDB/chronix.server/releases/download/v0.1.1/chronix-0.1.1.zip
-unzip chronix-0.1.1.zip
+wget https://github.com/ChronixDB/chronix.server/releases/download/0.2/chronix-0.2.zip
+unzip chronix-0.2.zip
 
-./chronix-solr-5.4.0/bin/solr start
+./chronix-solr-6.0.4/bin/solr start
 Waiting up to 30 seconds to see Solr running on port 8983 [|]  
 Started Solr server on port 8983 (pid=2504). Happy searching!
 ```

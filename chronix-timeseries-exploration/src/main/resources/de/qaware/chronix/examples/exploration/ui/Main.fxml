@@ -41,7 +41,6 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
-
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="1400.0"
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="de.qaware.chronix.examples.exploration.ui.MainController">
@@ -63,29 +62,52 @@
                                       prefWidth="400.0"
                                       visible="true" wrapText="true"
 
-                                      promptText="Enter your filter query to analyze results, e.g., ag=max, ag=dev, analysis=trend"
+                                      promptText="Enter your filter query to analyze results, e.g., function=max;dev, function=trend"
 
                             />
                         </children>
                     </VBox>
                 </top>
                 <center>
-
                     <SplitPane orientation="VERTICAL">
-                        <LineChart fx:id="chart" alternativeColumnFillVisible="false" alternativeRowFillVisible="true"
-                                   animated="false" cache="true" createSymbols="false" horizontalGridLinesVisible="true"
-                                   horizontalZeroLineVisible="true" legendSide="TOP" legendVisible="true"
-                                   maxHeight="Infinity" maxWidth="Infinity"
-                                   verticalGridLinesVisible="true" verticalZeroLineVisible="true"
-                                   BorderPane.alignment="CENTER"
-                                   style=" -fx-stroke-width: 1px; -fx-effect: null; -fx-background-color: #ffffff;">
-                            <xAxis>
-                                <DateAxis side="BOTTOM"/>
-                            </xAxis>
-                            <yAxis>
-                                <NumberAxis side="LEFT"/>
-                            </yAxis>
-                        </LineChart>
+                        <TabPane prefHeight="600">
+                            <tabs>
+                                <Tab text="Chart" closable="false">
+                                    <content>
+                                        <LineChart fx:id="chart" alternativeColumnFillVisible="false"
+                                                   alternativeRowFillVisible="true"
+                                                   animated="false" cache="true" createSymbols="false"
+                                                   horizontalGridLinesVisible="true"
+                                                   horizontalZeroLineVisible="true" legendSide="TOP"
+                                                   legendVisible="true"
+                                                   maxHeight="Infinity" maxWidth="Infinity"
+                                                   verticalGridLinesVisible="true" verticalZeroLineVisible="true"
+                                                   BorderPane.alignment="CENTER"
+                                                   style=" -fx-stroke-width: 1px; -fx-effect: null; -fx-background-color: #ffffff;">
+                                            <xAxis>
+                                                <DateAxis side="BOTTOM"/>
+                                            </xAxis>
+                                            <yAxis>
+                                                <NumberAxis side="LEFT"/>
+                                            </yAxis>
+                                        </LineChart>
+                                    </content>
+                                </Tab>
+                                <Tab text="Function results" closable="false">
+                                    <content>
+                                        <TableView fx:id="resultTable" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                            <columns>
+                                                <TableColumn fx:id="timeSeries" text="Time Series" prefWidth="300"/>
+                                                <TableColumn fx:id="aggregationOrAnalysis" text="Aggregation or Analysis" prefWidth="300"/>
+                                                <TableColumn fx:id="arguments" text="Arguments" prefWidth="300"/>
+                                                <TableColumn fx:id="values" text="Values" prefWidth="300"/>
+                                                <TableColumn fx:id="order" text="Execution Order" prefWidth="300"/>
+                                            </columns>
+                                        </TableView>
+                                    </content>
+                                </Tab>
+                            </tabs>
+                        </TabPane>
                         <AnchorPane>
                             <children>
                                 <TextArea fx:id="logs" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0"
