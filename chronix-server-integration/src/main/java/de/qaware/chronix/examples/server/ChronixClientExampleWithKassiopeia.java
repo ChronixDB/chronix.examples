@@ -34,7 +34,7 @@ import static de.qaware.chronix.timeseries.TimeSeries.merge;
 
 /**
  * An example showcase of how to integrate chronix into your application.
- * Works with the release 0.1.1 of the chronix-server
+ * Works with the release 0.2 of the chronix-server
  * Download at <a href="https://github.com/ChronixDB/chronix.server/releases/download/v0.1/chronix-0.1.zip">chronix-server-0.1.1</a>
  * Note: The example data stored in the release
  *
@@ -59,7 +59,7 @@ public class ChronixClientExampleWithKassiopeia {
 
         //We want the maximum of all time series that metric matches *load*.
         SolrQuery query = new SolrQuery("metric:*Load*");
-        query.addFilterQuery("ag=max");
+        query.addFilterQuery("function=max");
 
         //The result is a Java Stream. We simply collect the result into a list.
         List<TimeSeries<Long, Double>> maxTS = chronix.stream(solr, query).collect(Collectors.toList());
