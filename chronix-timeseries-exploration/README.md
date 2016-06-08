@@ -1,6 +1,6 @@
 # Time Series Exploration with Chronix
 This example shows how Chronix can be plugged into a rich client application. 
-The example is a simple ui with a line chart and a two text fields for enter Chronix range and analysis queries.
+The example is a simple ui with two text fields for range and function queries, a line chart to show the time series, and a table view to show the result of the functions.
 It uses a central Chronix Server to query the time series. 
 ##### Screenshot of the JavaFX Example
 ![Image of Chronix JavaFX Example](https://raw.githubusercontent.com/ChronixDB/chronix.examples/master/img/Chart-0.2.png)
@@ -35,7 +35,7 @@ Copy the example to a directory of your choice, e.g., /home/chronix/examples/jav
 ```Shell
 
 cd <Your-Download-Directory>
-java -jar chronix-timeseries-exploration.jar
+java -jar chronix-timeseries-exploration-{version}.jar
 ```
 You should then see the application shown in the screenshot, but with an empty chart.
 In the right lower corner you will find a small circle that indicates if the application is connected to Chronix.
