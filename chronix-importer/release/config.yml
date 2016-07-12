@@ -19,7 +19,7 @@ csvDelimiter: ;
 attributeFields:
  - host
  - group
- - process
+ - source
 
 
 #Will parse the csv files without importing them.

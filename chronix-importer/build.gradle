@@ -4,7 +4,7 @@ dependencies {
     compile 'org.yaml:snakeyaml:1.17'
 
     compile 'de.qaware.chronix:chronix-api:0.1'
-    compile 'de.qaware.chronix:chronix-server-client:0.2'
+    compile 'de.qaware.chronix:chronix-server-client:0.3'
     compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.2'
     compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.2'
 
@@ -30,5 +30,5 @@ jar {
 
 task buildRelease(type: Copy) {
     into "$projectDir/release/lib"
-    from "$buildDir/libs/chronix-importer-0.2.jar"
+    from "$buildDir/libs/chronix-importer-0.3.jar"
 }
