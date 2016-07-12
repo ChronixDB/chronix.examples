@@ -32,8 +32,19 @@ task copyLib(type: Copy) {
     into "$projectDir/importer/lib"
     from "$buildDir/libs/chronix-importer-${project.version}.jar"
 }
-task buildRelease(dependsOn: copyLib) {
-    File file = new File("$projectDir/importer/import.sh")
 
+task writeImporterScript(dependsOn: copyLib){
+    File file = new File("$projectDir/importer/import.sh")
     file.write "#!/usr/bin/env bash\njava -Dlog4j.configurationFile=log4j2.xml -jar lib/chronix-importer-${project.version}.jar config.yml data/"
+
+}
+
+task zip(dependsOn: writeImporterScript, type:Zip) {
+    from ("$projectDir/importer/")
+    into "importer-${project.version}"
+    destinationDir file('.')
+}
+
+task buildRelease(dependsOn: zip) {
+
 }
