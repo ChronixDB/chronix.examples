@@ -49,7 +49,7 @@ The field names are defined in the ***config.yml*** in the section ***attributeF
 attributeFields:
  - host
  - group
- - process
+ - source
 ```
 
 ***Important***: The order matters. This means that the first defined field is mapped to the first attribute, and so on.
