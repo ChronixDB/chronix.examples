@@ -16,12 +16,12 @@
 package de.qaware.chronix.examples.exploration.ui;
 
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
+import de.qaware.chronix.converter.MetricTimeSeriesConverter;
 import de.qaware.chronix.examples.exploration.ui.dt.DateAxis;
 import de.qaware.chronix.examples.exploration.ui.log.TextAreaLogger;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
-import de.qaware.chronix.timeseries.dt.Point;
+import de.qaware.chronix.timeseries.dts.Point;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -127,7 +127,7 @@ public class MainController implements Initializable {
                     return timeSeries;
                 };
 
-                chronix = new ChronixClient<>(new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
+                chronix = new ChronixClient<>(new MetricTimeSeriesConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
                 return null;
             }

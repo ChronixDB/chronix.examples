@@ -3,7 +3,7 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
 
     compile 'de.qaware.chronix:chronix-api:0.1'
-    compile 'de.qaware.chronix:chronix-server-client:0.2-beta-1'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.1.8-beta-4'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.1.8-beta-4'
+    compile 'de.qaware.chronix:chronix-server-client:0.3'
+    compile 'de.qaware.chronix:chronix-timeseries:0.3'
+    compile 'de.qaware.chronix:chronix-timeseries-converter:0.3'
 }

@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2015 QAware GmbH
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package de.qaware.chronix.importer;
 
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
-import de.qaware.chronix.converter.serializer.gen.SimpleProtocolBuffers;
+import de.qaware.chronix.converter.MetricTimeSeriesConverter;
+import de.qaware.chronix.converter.serializer.gen.MetricProtocolBuffers;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
+import de.qaware.chronix.timeseries.dts.Point;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -22,20 +38,17 @@ import java.util.stream.Collectors;
  */
 public class DatabaseImporter {
 
-    //serialized size of the list
-    private static final int LIST_SERIALIZED_SIZE = 2;
-    //serialized size of a point
-    private static final int POINT_SERIALIZED_SIZE = SimpleProtocolBuffers.Point.newBuilder().setT(Instant.now().toEpochMilli()).setV(4711).build().getSerializedSize();
-
-    private static final int SER_SIZE = LIST_SERIALIZED_SIZE + POINT_SERIALIZED_SIZE;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseImporter.class);
-
-    public static ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> CHRONIX = new ChronixClient<>(new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, null, null));
     public static final String DATABASE_SERVER_IP = "localhost";
     //Solr connection stuff
     public static final String SOLR_BASE_URL = "http://" + DATABASE_SERVER_IP + ":8983/solr/";
-    public static final SolrClient CHRONIX_SOLR_CLIENT = new HttpSolrClient(SOLR_BASE_URL + "chronix");
+    public static final SolrClient CHRONIX_SOLR_CLIENT = new HttpSolrClient.Builder(SOLR_BASE_URL + "chronix").build();
+    //serialized size of the list
+    private static final int LIST_SERIALIZED_SIZE = 2;
+    //serialized size of a point
+    private static final int POINT_SERIALIZED_SIZE = MetricProtocolBuffers.Point.newBuilder().setTlong(Instant.now().toEpochMilli()).setV(4711).build().getSerializedSize();
+    private static final int SER_SIZE = LIST_SERIALIZED_SIZE + POINT_SERIALIZED_SIZE;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseImporter.class);
+    public static ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> CHRONIX = new ChronixClient<>(new MetricTimeSeriesConverter(), new ChronixSolrStorage<>(200, null, null));
 
 
     private DatabaseImporter() {
@@ -61,7 +74,7 @@ public class DatabaseImporter {
 
             MetricTimeSeries timeSeries = builder.build();
             timeSeries.sort();
-            List<de.qaware.chronix.timeseries.dt.Point> points = timeSeries.points().collect(Collectors.toList());
+            List<Point> points = timeSeries.points().collect(Collectors.toList());
 
             final int chunkSize = 128 * 1024;
 
@@ -80,7 +93,7 @@ public class DatabaseImporter {
                     end = timeSeries.size();
                 }
 
-                List<de.qaware.chronix.timeseries.dt.Point> sublist = points.subList(start, end);
+                List<Point> sublist = points.subList(start, end);
                 start += numberOfPoints;
 
                 MetricTimeSeries.Builder toAddTs = new MetricTimeSeries.Builder(metadata.getMetric())
