@@ -18,11 +18,14 @@ package de.qaware.chronix.examples.exploration.ui;
 import de.qaware.chronix.ChronixClient;
 import de.qaware.chronix.converter.MetricTimeSeriesConverter;
 import de.qaware.chronix.examples.exploration.ui.dt.DateAxis;
+import de.qaware.chronix.examples.exploration.ui.dt.ResultRow;
 import de.qaware.chronix.examples.exploration.ui.log.TextAreaLogger;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
 import de.qaware.chronix.timeseries.dts.Point;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -30,6 +33,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -76,6 +81,24 @@ public class MainController implements Initializable {
     @FXML
     private LineChart<DateAxis, NumberAxis> chart;
 
+    /**
+     * Table stuff below
+     */
+    @FXML
+    private TableView<ResultRow> resultTable;
+    @FXML
+    private TableColumn<ResultRow, String> timeSeries;
+    @FXML
+    private TableColumn<ResultRow, String> aggregationOrAnalysis;
+    @FXML
+    private TableColumn<ResultRow, String> arguments;
+    @FXML
+    private TableColumn<ResultRow, String> values;
+    @FXML
+    private TableColumn<ResultRow, String> order;
+
+    private ObservableList<ResultRow> rows = FXCollections.observableArrayList();
+
     //Chronix stuff
     private ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> chronix;
     private SolrClient solr;
@@ -86,6 +109,14 @@ public class MainController implements Initializable {
 
         //Pipe logs to ui
         TextAreaLogger.setTextArea(logs);
+
+        //Init table
+        timeSeries.setCellValueFactory(cellData -> cellData.getValue().timeSeriesProperty());
+        aggregationOrAnalysis.setCellValueFactory(cellData -> cellData.getValue().aggregationOrAnalysisProperty());
+        arguments.setCellValueFactory(cellData -> cellData.getValue().argumentsProperty());
+        values.setCellValueFactory(cellData -> cellData.getValue().valuesProperty());
+        order.setCellValueFactory(cellData -> cellData.getValue().orderProperty());
+        resultTable.setItems(rows);
 
         EventHandler<KeyEvent> queryExecuteHandler = event -> {
             if (event.getCode() == KeyCode.ENTER && event.isShiftDown()) {
@@ -107,7 +138,7 @@ public class MainController implements Initializable {
             public Void call() {
 
                 LOGGER.info("Setting up Chronix with a remote Solr to URL {}", solrUrl);
-                solr = new HttpSolrClient(solrUrl);
+                solr = new HttpSolrClient.Builder(solrUrl).build();
 
                 boolean solrAvailable = solrAvailable();
                 LOGGER.info("Checking connection to Solr. Result {}", solrAvailable);
@@ -146,19 +177,18 @@ public class MainController implements Initializable {
 
                 Platform.runLater(() -> {
                     chart.getData().clear();
+                    rows.clear();
                     //Start the query
                     chart.setTitle("Your Query was q=" + queryString + " fq=" + fq);
                 });
 
                 SolrQuery query = new SolrQuery(queryString);
+                query.addField("+data");
+
                 boolean hasFilterQueries = !fq.isEmpty();
 
                 if (hasFilterQueries) {
                     query.addFilterQuery(fq);
-
-                    if (fq.contains("function=")) {
-                        query.addField("+data");
-                    }
                 }
 
                 long queryStart = System.currentTimeMillis();
@@ -167,12 +197,10 @@ public class MainController implements Initializable {
                 LOGGER.info("Query took: {} ms for {} points", (queryEnd - queryStart), size(result));
                 queryStart = System.currentTimeMillis();
                 result.forEach(ts -> {
-
                     if (hasFilterQueries) {
-                        convertAggregationOrAnalysisTs(ts, fq.contains("function="));
-                    } else {
-                        convertTsToSeries(ts);
+                        addFunctionsToTable(ts);
                     }
+                    convertTsToSeries(ts);
                 });
                 queryEnd = System.currentTimeMillis();
                 LOGGER.info("Charting took: {} ms", (queryEnd - queryStart));
@@ -183,7 +211,7 @@ public class MainController implements Initializable {
 
     }
 
-    private void convertAggregationOrAnalysisTs(MetricTimeSeries ts, boolean analysis) {
+    private void addFunctionsToTable(MetricTimeSeries ts) {
 
         //find the aggregations / and analyses
 
@@ -191,39 +219,24 @@ public class MainController implements Initializable {
             //we have function value
             if (key.contains("function") && !key.contains("arguments")) {
                 String[] splits = key.split("_");
-                XYChart.Series<DateAxis, NumberAxis> series = new XYChart.Series<>();
 
                 //function name
-                String name = splits[1];
-                series.setName(join(ts) + "-" + name);
+                String name = splits[2];
 
-                //function value
-                if (analysis) {
-                    ts.sort();
-                    List<Point> points;
-                    if (ts.size() > 200_000) {
-                        points = ts.points().filter(point -> point.getIndex() % 1000 == 0).collect(Collectors.toList());
-                    } else {
-                        points = ts.points().collect(Collectors.toList());
-                    }
-                    //reduce the amount shown in the chart we add every 100ths point
-                    addPointsToSeries(series, points);
-                    Platform.runLater(() -> chart.getData().add(series));
+                //Check if the function has an argument
+                Object arguments = ts.attribute(splits[0] + "_" + splits[1] + "_arguments_" + splits[2]);
 
-
-                } else {
-                    Instant start = Instant.ofEpochMilli(ts.getStart());
-                    Instant end = Instant.ofEpochMilli(ts.getEnd());
-
-                    series.getData().add(new XYChart.Data(start, value));
-                    series.getData().add(new XYChart.Data(end, value));
-                    Platform.runLater(() -> chart.getData().add(series));
+                ResultRow row = new ResultRow();
+                row.setTimeSeries(join(ts));
+                row.setAggregationOrAnalysis(name);
+                if (arguments != null) {
+                    row.setArguments(arguments.toString());
                 }
+                row.setValues(value.toString());
+                row.setOrder(key);
 
 
-            } else {
-                //function arguments
-                //currently ignored
+                rows.add(row);
             }
 
 
@@ -276,7 +289,7 @@ public class MainController implements Initializable {
         if (ts == null) {
             return "";
         }
-        return String.valueOf(ts.attribute("host")) + "-" +
+        return ts.attribute("host") + "-" +
                 ts.attribute("source") + "-" +
                 ts.attribute("group") + "-" +
                 ts.getMetric();
