@@ -156,7 +156,7 @@ public class MainController implements Initializable {
                 if (hasFilterQueries) {
                     query.addFilterQuery(fq);
 
-                    if (fq.contains("analysis=")) {
+                    if (fq.contains("function=")) {
                         query.addField("+data");
                     }
                 }
@@ -169,7 +169,7 @@ public class MainController implements Initializable {
                 result.forEach(ts -> {
 
                     if (hasFilterQueries) {
-                        convertAggregationOrAnalysisTs(ts, fq.contains("analysis="));
+                        convertAggregationOrAnalysisTs(ts, fq.contains("function="));
                     } else {
                         convertTsToSeries(ts);
                     }
