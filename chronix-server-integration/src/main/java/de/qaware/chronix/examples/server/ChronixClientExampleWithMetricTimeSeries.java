@@ -16,7 +16,7 @@
 package de.qaware.chronix.examples.server;
 
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
+import de.qaware.chronix.converter.MetricTimeSeriesConverter;
 import de.qaware.chronix.converter.common.DoubleList;
 import de.qaware.chronix.converter.common.LongList;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
@@ -33,19 +33,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * An example showcase of how to integrate chronix into your application using kassiopeia-simple
- * Works with the release 0.2 of the chronix-server
- * Download at <a href="https://github.com/ChronixDB/chronix.server/releases/download/v0.1.1/chronix-0.1.1.zip">chronix-server-0.1.1</a>
+ * An example showcase of how to integrate chronix into your application
  *
  * @author f.lautenschlager
  */
-public class ChronixClientExampleWithKassiopeiaSimple {
+public class ChronixClientExampleWithMetricTimeSeries {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChronixClientExampleWithKassiopeiaSimple.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChronixClientExampleWithMetricTimeSeries.class);
 
 
     public static void main(String[] args) {
-        SolrClient solr = new HttpSolrClient("http://localhost:8983/solr/chronix/");
+        SolrClient solr = new HttpSolrClient.Builder("http://localhost:8983/solr/chronix/").build();
 
         //Define a group by function for the time series records
         Function<MetricTimeSeries, String> groupBy = ts -> ts.getMetric() + "-" + ts.attribute("host");
@@ -60,7 +58,7 @@ public class ChronixClientExampleWithKassiopeiaSimple {
         };
         //Instantiate a Chronix Client
         ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> chronix = new ChronixClient<>(
-                new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
+                new MetricTimeSeriesConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
         //We want the maximum of all time series that metric matches *load*.
         SolrQuery query = new SolrQuery("metric:*Load*");

@@ -16,7 +16,7 @@
 package de.qaware.chronix.examples.server;
 
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaConverter;
+import de.qaware.chronix.converter.AdvancedTimeSeriesConverter;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.TimeSeries;
 import org.apache.solr.client.solrj.SolrClient;
@@ -55,7 +55,7 @@ public class ChronixClientExampleWithKassiopeia {
 
         //Instantiate a Chronix Client
         ChronixClient<TimeSeries<Long, Double>, SolrClient, SolrQuery> chronix = new ChronixClient<>(
-                new KassiopeiaConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
+                new AdvancedTimeSeriesConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
         //We want the maximum of all time series that metric matches *load*.
         SolrQuery query = new SolrQuery("metric:*Load*");

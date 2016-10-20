@@ -33,15 +33,10 @@ dependencies {
     compile 'de.qaware.chronix:chronix-api:0.1'
     compile 'de.qaware.chronix:chronix-server-client:0.3'
 
-    //Kassiopeia-Simple
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.2'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.2'
-
-    //Kassiopeia
-    compile 'de.qaware.chronix:chronix-kassiopeia:0.2'
-    compile 'de.qaware.chronix:chronix-kassiopeia-converter:0.2'
+    compile 'de.qaware.chronix:chronix-timeseries:0.3'
+    compile 'de.qaware.chronix:chronix-timeseries-converter:0.3'
 
     //Solr
-    compile 'org.apache.solr:solr-solrj:6.1.0'
+    compile 'org.apache.solr:solr-solrj:6.2.1'
 
 }

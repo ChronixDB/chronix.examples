@@ -16,13 +16,13 @@
 package de.qaware.chronix.examples.exploration.ui;
 
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
+import de.qaware.chronix.converter.MetricTimeSeriesConverter;
 import de.qaware.chronix.examples.exploration.ui.dt.DateAxis;
 import de.qaware.chronix.examples.exploration.ui.dt.ResultRow;
 import de.qaware.chronix.examples.exploration.ui.log.TextAreaLogger;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
-import de.qaware.chronix.timeseries.Point;
+import de.qaware.chronix.timeseries.dts.Point;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -138,7 +138,7 @@ public class MainController implements Initializable {
             public Void call() {
 
                 LOGGER.info("Setting up Chronix with a remote Solr to URL {}", solrUrl);
-                solr = new HttpSolrClient(solrUrl);
+                solr = new HttpSolrClient.Builder(solrUrl).build();
 
                 boolean solrAvailable = solrAvailable();
                 LOGGER.info("Checking connection to Solr. Result {}", solrAvailable);
@@ -158,7 +158,7 @@ public class MainController implements Initializable {
                     return timeSeries;
                 };
 
-                chronix = new ChronixClient<>(new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
+                chronix = new ChronixClient<>(new MetricTimeSeriesConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
                 return null;
             }

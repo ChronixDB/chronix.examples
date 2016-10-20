@@ -5,8 +5,8 @@ dependencies {
 
     compile 'de.qaware.chronix:chronix-api:0.1'
     compile 'de.qaware.chronix:chronix-server-client:0.3'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple:0.2'
-    compile 'de.qaware.chronix:chronix-kassiopeia-simple-converter:0.2'
+    compile 'de.qaware.chronix:chronix-timeseries:0.3'
+    compile 'de.qaware.chronix:chronix-timeseries-converter:0.3'
 
     //Testing
     testCompile 'org.codehaus.groovy:groovy-all:2.4.6'
