@@ -28,9 +28,6 @@ allprojects {
 
     group 'de.qaware.chronix'
 
-    version = "0.3"
-
-
     repositories {
         jcenter()
         mavenCentral()
@@ -52,6 +49,7 @@ subprojects {
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'com.github.hierynomus.license'
 
+    version = "0.4"
 
     license {
         includes(["**/*.java", "**/*.groovy"])

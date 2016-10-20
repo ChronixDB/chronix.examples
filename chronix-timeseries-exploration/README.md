@@ -1,9 +1,11 @@
 # Time Series Exploration with Chronix
 This example shows how Chronix can be plugged into a rich client application. 
-The example is a simple ui with a line chart and a two text fields for enter Chronix range and analysis queries.
+The example is a simple ui with two text fields for range and function queries, a line chart to show the time series, and a table view to show the result of the functions.
 It uses a central Chronix Server to query the time series. 
 ##### Screenshot of the JavaFX Example
-![Image of Chronix JavaFX Example](https://bintray.com/artifact/download/chronix/Images/2015-11-25%2016_08_50-Chronix%20JavaFX%20Example.png)
+![Image of Chronix JavaFX Example](https://raw.githubusercontent.com/ChronixDB/chronix.examples/master/img/Chart-0.2.png)
+
+![Image of Chronix JavaFX Example](https://raw.githubusercontent.com/ChronixDB/chronix.examples/master/img/Result-0.2.png)
 
 ## How to start?
 To start you have to do a few steps:
@@ -16,12 +18,12 @@ To start you have to do a few steps:
 First ensure that you have a Java 8 runtime environment in your PATH. 
 That should be easy ;-).
 
-Then download, unzip and start  the [Chronix Server](https://github.com/ChronixDB/chronix.server/releases/tag/v0.0.2).
+Then download, unzip and start  the [Chronix Server](https://github.com/ChronixDB/chronix.server/releases/tag/0.2).
 ```
-wget https://github.com/ChronixDB/chronix.server/releases/download/v0.1.1/chronix-0.1.1.zip
-unzip chronix-0.1.1.zip
+wget https://github.com/ChronixDB/chronix.server/releases/download/0.2/chronix-0.2.zip
+unzip chronix-0.2.zip
 
-./chronix-solr-5.4.0/bin/solr start
+./chronix-solr-6.0.1/bin/solr start
 Waiting up to 30 seconds to see Solr running on port 8983 [|]  
 Started Solr server on port 8983 (pid=2504). Happy searching!
 ```
@@ -33,7 +35,7 @@ Copy the example to a directory of your choice, e.g., /home/chronix/examples/jav
 ```Shell
 
 cd <Your-Download-Directory>
-java -jar chronix-timeseries-exploration.jar
+java -jar chronix-timeseries-exploration-{version}.jar
 ```
 You should then see the application shown in the screenshot, but with an empty chart.
 In the right lower corner you will find a small circle that indicates if the application is connected to Chronix.
@@ -60,7 +62,7 @@ The second text area is for filter queries (e.g. analyses like ag=max, analysis=
 #Get the average load (metric) on day 28.08.2013
 Range Query: metric:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
 
-#Get the maximum of the load (metric) on day 28.08.2013
+#Get the maximum, minimum, average of the load (metric) on day 28.08.2013
 Range Query: metric:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
-Filter Query: ag=max
+Filter Query: function=max;min;avg
 ```

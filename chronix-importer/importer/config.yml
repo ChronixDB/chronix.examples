@@ -1,0 +1,32 @@
+#The connection to chronix
+chronix: http://localhost:8983/solr/chronix
+
+#valid values: LONG (ms since 1970), INSTANT (default java 8 instant), 'SDF-FORMAT' e.g dd.MM.yyyy HH:mm:ss.SSS
+dateFormat: dd.MM.yyyy HH:mm:ss.SSS
+
+#valid values: ENGLISH, GERMAN
+numberFormat: ENGLISH
+
+# delimiter for csv files.
+#valid values: , or ;
+csvDelimiter: ;
+
+#the name of the attribute fields.
+#the order matters.
+#the attributes are extracted from the file name
+#jenkins_global_unix-global_qaware-jenkins
+#host_group_process
+attributeFields:
+ - host
+ - group
+ - source
+
+
+#Will parse the csv files without importing them.
+#Only generates the metrics.csv file
+#valid values: true / false
+onlyGenerateMetricsFile: false
+
+
+#Will delete old metrics before new metrics are imported
+cleanImport: true

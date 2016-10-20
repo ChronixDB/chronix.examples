@@ -41,9 +41,8 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-      prefHeight="600.0"
-      prefWidth="1400.0" xmlns="http://javafx.com/javafx/8"
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="1400.0"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="de.qaware.chronix.examples.exploration.ui.MainController">
     <children>
         <AnchorPane focusTraversable="true" VBox.vgrow="ALWAYS">
@@ -99,8 +98,7 @@
                                         <TableView fx:id="resultTable" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                             <columns>
                                                 <TableColumn fx:id="timeSeries" text="Time Series" prefWidth="300"/>
-                                                <TableColumn fx:id="aggregationOrAnalysis"
-                                                             text="Aggregation or Analysis" prefWidth="300"/>
+                                                <TableColumn fx:id="aggregationOrAnalysis" text="Aggregation or Analysis" prefWidth="300"/>
                                                 <TableColumn fx:id="arguments" text="Arguments" prefWidth="300"/>
                                                 <TableColumn fx:id="values" text="Values" prefWidth="300"/>
                                                 <TableColumn fx:id="order" text="Execution Order" prefWidth="300"/>

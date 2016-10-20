@@ -35,59 +35,59 @@ public class ResultRow {
         return timeSeries.get();
     }
 
-    public void setTimeSeries(String timeSeries) {
-        this.timeSeries.set(timeSeries);
-    }
-
     public SimpleStringProperty timeSeriesProperty() {
         return timeSeries;
+    }
+
+    public void setTimeSeries(String timeSeries) {
+        this.timeSeries.set(timeSeries);
     }
 
     public String getAggregationOrAnalysis() {
         return aggregationOrAnalysis.get();
     }
 
-    public void setAggregationOrAnalysis(String aggregationOrAnalysis) {
-        this.aggregationOrAnalysis.set(aggregationOrAnalysis);
-    }
-
     public SimpleStringProperty aggregationOrAnalysisProperty() {
         return aggregationOrAnalysis;
+    }
+
+    public void setAggregationOrAnalysis(String aggregationOrAnalysis) {
+        this.aggregationOrAnalysis.set(aggregationOrAnalysis);
     }
 
     public String getArguments() {
         return arguments.get();
     }
 
-    public void setArguments(String arguments) {
-        this.arguments.set(arguments);
-    }
-
     public SimpleStringProperty argumentsProperty() {
         return arguments;
+    }
+
+    public void setArguments(String arguments) {
+        this.arguments.set(arguments);
     }
 
     public String getValues() {
         return values.get();
     }
 
-    public void setValues(String values) {
-        this.values.set(values);
-    }
-
     public SimpleStringProperty valuesProperty() {
         return values;
+    }
+
+    public void setValues(String values) {
+        this.values.set(values);
     }
 
     public String getOrder() {
         return order.get();
     }
 
-    public void setOrder(String order) {
-        this.order.set(order);
-    }
-
     public SimpleStringProperty orderProperty() {
         return order;
+    }
+
+    public void setOrder(String order) {
+        this.order.set(order);
     }
 }

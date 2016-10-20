@@ -1,9 +1,50 @@
 dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-io:commons-io:2.5'
+    compile 'org.yaml:snakeyaml:1.17'
 
     compile 'de.qaware.chronix:chronix-api:0.1'
     compile 'de.qaware.chronix:chronix-server-client:0.3'
     compile 'de.qaware.chronix:chronix-timeseries:0.3'
     compile 'de.qaware.chronix:chronix-timeseries-converter:0.3'
+
+    //Testing
+    testCompile 'org.codehaus.groovy:groovy-all:2.4.6'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'cglib:cglib-nodep:3.2.0'
+    testCompile 'org.objenesis:objenesis:2.2'
+}
+
+jar {
+
+    manifest {
+        attributes "Main-Class": "de.qaware.chronix.importer.CSVImporter"
+    }
+
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+task copyLib(type: Copy) {
+    into "$projectDir/importer/lib"
+    from "$buildDir/libs/chronix-importer-${project.version}.jar"
+}
+
+task writeImporterScript(dependsOn: copyLib){
+    File file = new File("$projectDir/importer/import.sh")
+    file.write "#!/usr/bin/env bash\njava -Dlog4j.configurationFile=log4j2.xml -jar lib/chronix-importer-${project.version}.jar config.yml data/"
+
+}
+
+task zip(dependsOn: writeImporterScript, type:Zip) {
+    from ("$projectDir/importer/")
+    into "importer-${project.version}"
+    destinationDir file('.')
+}
+
+task buildRelease(dependsOn: zip) {
+
 }
