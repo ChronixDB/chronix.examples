@@ -14,20 +14,11 @@
  *    limitations under the License.
  */
 
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.1'
-        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.4.0'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-    }
+plugins {
+    id "de.undercouch.download" version "3.1.1"
+    id "com.github.hierynomus.license" version "0.13.1"
+    id "com.jfrog.bintray" version "1.7.2"
+    id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 allprojects {
@@ -45,7 +36,7 @@ allprojects {
     }
 
     jacoco {
-        toolVersion = '0.7.2.201409121644'
+        toolVersion = '0.7.6.201602180812'
     }
 }
 
@@ -54,11 +45,10 @@ subprojects {
     apply plugin: 'groovy'
     apply plugin: 'java'
     apply plugin: 'maven-publish'
-    apply plugin: 'com.gradle.plugin-publish'
     apply plugin: 'com.jfrog.bintray'
     apply plugin: 'com.github.hierynomus.license'
 
-    version = "0.4"
+    version = "0.5-beta"
 
     license {
         includes(["**/*.java", "**/*.groovy"])
@@ -151,6 +141,6 @@ tasks.coveralls {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.10'
+    gradleVersion = '3.2.1'
 }
 
