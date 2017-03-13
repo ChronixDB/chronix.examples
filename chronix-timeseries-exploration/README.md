@@ -59,10 +59,10 @@ The data set used for this example is one week of operational time series data.
 The first text area is for range queries. 
 The second text area is for filter queries (e.g. analyses like ag=max, analysis=trend)
 ```JSON
-#Get the average load (metric) on day 28.08.2013
-Range Query: metric:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
+#Get the average load on day 28.08.2013
+Range Query: name:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
 
-#Get the maximum, minimum, average of the load (metric) on day 28.08.2013
-Range Query: metric:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
-Filter Query: function=max;min;avg
+#Get the maximum, minimum, average of the load on day 28.08.2013
+Range Query: name:\\Load\\avg AND start:2013-08-28T00:00:00.000Z AND end:2013-08-29T23:59:59.999Z
+Chronix Function Query: cf=metric{max;min;avg}
 ```
