@@ -15,13 +15,13 @@
  */
 package de.qaware.chronix.importer.csv;
 
+
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
-import de.qaware.chronix.converter.serializer.gen.SimpleProtocolBuffers;
+import de.qaware.chronix.converter.MetricTimeSeriesConverter;
+import de.qaware.chronix.converter.serializer.gen.MetricProtocolBuffers;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
-import de.qaware.chronix.timeseries.Point;
-import org.apache.solr.client.solrj.SolrClient;
+import de.qaware.chronix.timeseries.dts.Point;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -46,8 +46,8 @@ public class ChronixImporter {
     //serialized size of the list
     private static final int LIST_SERIALIZED_SIZE = 2;
     //serialized size of a point
-    private static final int POINT_SERIALIZED_SIZE = SimpleProtocolBuffers.Point.newBuilder()
-            .setT(Instant.now().toEpochMilli())
+    private static final int POINT_SERIALIZED_SIZE = MetricProtocolBuffers.Point.newBuilder()
+            .setTlong(Instant.now().toEpochMilli())
             .setV(4711).build()
             .getSerializedSize();
     private static final int SER_SIZE = LIST_SERIALIZED_SIZE + POINT_SERIALIZED_SIZE;
@@ -55,8 +55,8 @@ public class ChronixImporter {
 
     private final String[] SCHEMA_FIELDS;
 
-    private final SolrClient CHRONIX_SOLR_CLIENT;
-    private ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> CHRONIX;
+    private final HttpSolrClient CHRONIX_SOLR_CLIENT;
+    private ChronixClient<MetricTimeSeries, HttpSolrClient, SolrQuery> CHRONIX;
 
     /**
      * Constructs a Chronix importer
@@ -64,10 +64,10 @@ public class ChronixImporter {
      * @param url the url to chronix server
      */
     public ChronixImporter(String url, String[] attributeFields) {
-        CHRONIX_SOLR_CLIENT = new HttpSolrClient(url);
+        CHRONIX_SOLR_CLIENT = new HttpSolrClient.Builder().withBaseSolrUrl(url).build();
         SCHEMA_FIELDS = attributeFields;
-        CHRONIX = new ChronixClient<>(new KassiopeiaSimpleConverter(),
-                new ChronixSolrStorage<>(200, null, null));
+        CHRONIX = new ChronixClient<>(new MetricTimeSeriesConverter(),
+                new ChronixSolrStorage(200, null, null));
     }
 
     public BiConsumer<List<ImportPoint>, Attributes> doNothing() {
@@ -145,7 +145,7 @@ public class ChronixImporter {
 
     private MetricTimeSeries.Builder getPrefilledTimeSeriesBuilder(Attributes attributes) {
         //String metric = metadata.joinWithoutMetric() + "." + metadata.getMetric();
-        MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(attributes.getMetric());
+        MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(attributes.getMetric(), "metric");
         for (int i = 0; i < SCHEMA_FIELDS.length; i++) {
             builder.attribute(SCHEMA_FIELDS[i], attributes.get(i));
         }

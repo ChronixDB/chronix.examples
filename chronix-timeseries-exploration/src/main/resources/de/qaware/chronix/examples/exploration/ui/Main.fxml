@@ -55,14 +55,14 @@
                             <TextArea fx:id="query" disable="false" editable="true" prefHeight="99.0" prefWidth="400.0"
                                       visible="true" wrapText="true"
 
-                                      promptText="Enter your Query here. The following fields are available: start, end, metric, and host. An example query is: metric:*usage* AND host:prod*. Press enter to execute the query."
+                                      promptText="Enter your Query here. The following fields are available: start, end, name, and host. An example query is: name:*usage* AND host:prod*. Press enter to execute the query."
 
                             />
                             <TextArea fx:id="fqQuery" disable="false" editable="true" prefHeight="50.0"
                                       prefWidth="400.0"
                                       visible="true" wrapText="true"
 
-                                      promptText="Enter your filter query to analyze results, e.g., function=max;dev, function=trend"
+                                      promptText="Enter your chronix function query to analyze results, e.g., metric{max;dev} or metric{trend}"
 
                             />
                         </children>

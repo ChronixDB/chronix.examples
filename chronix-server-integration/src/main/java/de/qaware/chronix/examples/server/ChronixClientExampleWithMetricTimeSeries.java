@@ -16,9 +16,7 @@
 package de.qaware.chronix.examples.server;
 
 import de.qaware.chronix.ChronixClient;
-import de.qaware.chronix.converter.KassiopeiaSimpleConverter;
-import de.qaware.chronix.converter.common.DoubleList;
-import de.qaware.chronix.converter.common.LongList;
+import de.qaware.chronix.converter.MetricTimeSeriesConverter;
 import de.qaware.chronix.solr.client.ChronixSolrStorage;
 import de.qaware.chronix.timeseries.MetricTimeSeries;
 import org.apache.solr.client.solrj.SolrClient;
@@ -33,38 +31,36 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * An example showcase of how to integrate chronix into your application using kassiopeia-simple
- * Works with the release 0.2 of the chronix-server
- * Download at <a href="https://github.com/ChronixDB/chronix.server/releases/download/v0.1.1/chronix-0.1.1.zip">chronix-server-0.1.1</a>
+ * An example showcase of how to integrate chronix into your application
  *
  * @author f.lautenschlager
  */
-public class ChronixClientExampleWithKassiopeiaSimple {
+public class ChronixClientExampleWithMetricTimeSeries {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChronixClientExampleWithKassiopeiaSimple.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChronixClientExampleWithMetricTimeSeries.class);
 
 
     public static void main(String[] args) {
-        SolrClient solr = new HttpSolrClient("http://localhost:8983/solr/chronix/");
+        SolrClient solr = new HttpSolrClient.Builder().withBaseSolrUrl("http://localhost:8983/solr/chronix/").build();
 
         //Define a group by function for the time series records
-        Function<MetricTimeSeries, String> groupBy = ts -> ts.getMetric() + "-" + ts.attribute("host");
+        Function<MetricTimeSeries, String> groupBy = ts -> ts.getName() + "-" + ts.attribute("host");
 
         //Define a reduce function for the grouped time series records
         BinaryOperator<MetricTimeSeries> reduce = (ts1, ts2) -> {
             if (ts1 == null || ts2 == null) {
-                return new MetricTimeSeries.Builder("empty").build();
+                return new MetricTimeSeries.Builder("empty", "metric").build();
             }
             ts1.addAll(ts2.getTimestampsAsArray(), ts2.getValuesAsArray());
             return ts1;
         };
         //Instantiate a Chronix Client
         ChronixClient<MetricTimeSeries, SolrClient, SolrQuery> chronix = new ChronixClient<>(
-                new KassiopeiaSimpleConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
+                new MetricTimeSeriesConverter(), new ChronixSolrStorage<>(200, groupBy, reduce));
 
         //We want the maximum of all time series that metric matches *load*.
-        SolrQuery query = new SolrQuery("metric:*Load*");
-        query.addFilterQuery("function=max");
+        SolrQuery query = new SolrQuery("name:*Load*");
+        query.setParam("cf", "metric{max}");
 
         //The result is a Java Stream. We simply collect the result into a list.
         List<MetricTimeSeries> maxTS = chronix.stream(solr, query).collect(Collectors.toList());
@@ -78,23 +74,14 @@ public class ChronixClientExampleWithKassiopeiaSimple {
 
         for (MetricTimeSeries ts : maxTS) {
             sb.append("metric:[")
-                    .append(ts.getMetric())
+                    .append(ts.getName())
+                    .append("-")
+                    .append(ts.getType())
                     .append("] with value: [")
-                    .append(ts.getValues())
+                    .append(ts.getAttributesReference().get("0_function_max"))
                     .append("]")
                     .append("\n");
         }
         return sb.toString();
     }
-
-    private static LongList concat(LongList first, LongList second) {
-        first.addAll(second);
-        return first;
-    }
-
-    private static DoubleList concat(DoubleList first, DoubleList second) {
-        first.addAll(second);
-        return first;
-    }
-
 }
