@@ -172,23 +172,23 @@ public class MainController implements Initializable {
             @Override
             protected Void call() throws Exception {
                 String queryString = query.getText().trim();
-                String fq = fqQuery.getText().trim();
+                String cf = fqQuery.getText().trim();
 
 
                 Platform.runLater(() -> {
                     chart.getData().clear();
                     rows.clear();
                     //Start the query
-                    chart.setTitle("Your Query was q=" + queryString + " fq=" + fq);
+                    chart.setTitle("Your Query was q=" + queryString + " cf=" + cf);
                 });
 
                 SolrQuery query = new SolrQuery(queryString);
                 query.addField("+data");
 
-                boolean hasFilterQueries = !fq.isEmpty();
+                boolean hasFilterQueries = !cf.isEmpty();
 
                 if (hasFilterQueries) {
-                    query.addFilterQuery(fq);
+                    query.setParam("cf", cf);
                 }
 
                 long queryStart = System.currentTimeMillis();
@@ -292,7 +292,8 @@ public class MainController implements Initializable {
         return ts.attribute("host") + "-" +
                 ts.attribute("source") + "-" +
                 ts.attribute("group") + "-" +
-                ts.getMetric();
+                ts.getType() + "-" +
+                ts.getName();
     }
 
 

@@ -3,10 +3,15 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
     compile 'org.yaml:snakeyaml:1.17'
 
-    compile 'de.qaware.chronix:chronix-api:0.1'
-    compile 'de.qaware.chronix:chronix-server-client:0.3'
-    compile 'de.qaware.chronix:chronix-timeseries:0.3'
-    compile 'de.qaware.chronix:chronix-timeseries-converter:0.3'
+    compile 'de.qaware.chronix:chronix-api:0.2-beta'
+    compile 'de.qaware.chronix:chronix-timeseries:0.3.2-beta'
+    compile 'de.qaware.chronix:chronix-timeseries-converter:0.3.2-beta'
+    compile 'de.qaware.chronix:chronix-timeseries-common:0.3.2-beta'
+
+    compile 'de.qaware.chronix:chronix-server-client:0.5-beta'
+
+
+    compile 'org.apache.solr:solr-solrj:6.4.2'
 
     //Testing
     testCompile 'org.codehaus.groovy:groovy-all:2.4.6'

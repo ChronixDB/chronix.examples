@@ -33,7 +33,7 @@ The following sections describe the file name and the internal structure of the 
 
 ### File Name Format and Attributes
 We first want to take a look on how the attributes are represented.
-The attributes are part of the file name and are separated by ***\_***.
+The attributes are part of the file name and are serrated by ***\_***.
 The schema looks like:
 
  - attribute_attribute_attribute_..._attribute.csv.(gz)
