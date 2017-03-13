@@ -51,7 +51,8 @@ The data set used for this example is one week of operational time series data.
 | host          | prod39                     |
 | source        | os                         |  
 | group         | unix                       |
-| metric        | "Unix Top metrics"         |
+| name          | "Unix Top metrics"         |
+| type          | metric                     |
 | start         | 26.08.2013 00:00:17.361    |
 | end           | 01.09.2013 23:59:18.096    |
 
