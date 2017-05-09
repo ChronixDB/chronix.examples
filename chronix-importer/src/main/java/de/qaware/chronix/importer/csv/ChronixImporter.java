@@ -25,6 +25,10 @@ import de.qaware.chronix.timeseries.dts.Point;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.opentsdb.client.ExpectResponse;
+import org.opentsdb.client.HttpClientImpl;
+import org.opentsdb.client.builder.Metric;
+import org.opentsdb.client.builder.MetricBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +55,7 @@ public class ChronixImporter {
             .setV(4711).build()
             .getSerializedSize();
     private static final int SER_SIZE = LIST_SERIALIZED_SIZE + POINT_SERIALIZED_SIZE;
+    private final String URL;
 
 
     private final String[] SCHEMA_FIELDS;
@@ -64,6 +69,7 @@ public class ChronixImporter {
      * @param url the url to chronix server
      */
     public ChronixImporter(String url, String[] attributeFields) {
+        URL = url;
         CHRONIX_SOLR_CLIENT = new HttpSolrClient.Builder().withBaseSolrUrl(url).build();
         SCHEMA_FIELDS = attributeFields;
         CHRONIX = new ChronixClient<>(new MetricTimeSeriesConverter(),
@@ -83,10 +89,14 @@ public class ChronixImporter {
      *
      * @return a BiConsumer handling the given list of import points and attributes
      */
-    public BiConsumer<List<ImportPoint>, Attributes> importToChronix(boolean cleanImport) {
+    public BiConsumer<List<ImportPoint>, Attributes> importToChronix(boolean cleanImport, boolean useOpenTSDB) {
 
         if (cleanImport) {
             deleteIndex();
+        }
+
+        if (useOpenTSDB) {
+            LOGGER.info("Using OpenTSDB protocol");
         }
 
 
@@ -130,7 +140,34 @@ public class ChronixImporter {
                 records.add(record.build());
             }
 
-            CHRONIX.add(records, CHRONIX_SOLR_CLIENT);
+            if (useOpenTSDB) {
+                org.opentsdb.client.HttpClient client = new HttpClientImpl(URL + "/ingest/opentsdb/http");
+                MetricBuilder openTSDBBuilder = MetricBuilder.getInstance();
+
+
+                for (MetricTimeSeries chunk : records) {
+                    chunk.points().forEach(point -> {
+                        Metric metric = openTSDBBuilder.addMetric(attributes.getMetric());
+                        for (int i = 0; i < SCHEMA_FIELDS.length; i++) {
+                            metric.addTag(SCHEMA_FIELDS[i], attributes.get(i));
+                        }
+                        metric.setDataPoint(point.getTimestamp(), point.getValue());
+                    });
+
+                }
+
+                try {
+                    client.setCommit(false);
+                    client.pushMetrics(openTSDBBuilder, ExpectResponse.STATUS_CODE);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+            } else {
+                CHRONIX.add(records, CHRONIX_SOLR_CLIENT);
+            }
+
         };
 
     }

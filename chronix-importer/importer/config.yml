@@ -27,6 +27,9 @@ attributeFields:
 #valid values: true / false
 onlyGenerateMetricsFile: false
 
+#Uses the openTSDB ingestion
+useOpenTSDB: true
+
 
 #Will delete old metrics before new metrics are imported
 cleanImport: true

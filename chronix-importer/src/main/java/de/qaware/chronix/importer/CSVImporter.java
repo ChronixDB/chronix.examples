@@ -64,6 +64,8 @@ public class CSVImporter {
 
         boolean onlyMetricsFile = (boolean) config.get("onlyGenerateMetricsFile");
 
+        boolean useOpenTSDB = (boolean) config.get("useOpenTSDB");
+
         //get the required values from the configuration
         String dateFormat = (String) config.get("dateFormat");
         String numberFormat = (String) config.get("numberFormat");
@@ -78,15 +80,17 @@ public class CSVImporter {
         Pair<Integer, Integer> result;
 
         LOGGER.info("Start importing files to the Chronix.");
+        long start = System.currentTimeMillis();
         if (onlyMetricsFile) {
             result = importer.importPoints(importStatistics, timeSeriesFiles, chronixImporter.doNothing());
         } else {
-            result = importer.importPoints(importStatistics, timeSeriesFiles, chronixImporter.importToChronix(cleanImport));
+            result = importer.importPoints(importStatistics, timeSeriesFiles, chronixImporter.importToChronix(cleanImport, useOpenTSDB));
         }
         LOGGER.info("Done importing. Trigger commit.");
         chronixImporter.commit();
+        long end = System.currentTimeMillis();
 
 
-        LOGGER.info("Import done. Imported {} time series with {} points", result.getFirst(), result.getSecond());
+        LOGGER.info("Import done (Took: {} sec). Imported {} time series with {} points", (end - start) / 1000, result.getFirst(), result.getSecond());
     }
 }

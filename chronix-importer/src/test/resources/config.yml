@@ -19,13 +19,16 @@ csvDelimiter: ;
 attributeFields:
  - host
  - group
- - process
+ - source
 
 
 #Will parse the csv files without importing them.
 #Only generates the metrics.csv file
 #valid values: true / false
-onlyGenerateMetricsFile: true
+onlyGenerateMetricsFile: false
+
+#Uses the openTSDB ingestion
+useOpenTSDB: false
 
 #Will delete old metrics before new metrics are imported
 cleanImport: true
