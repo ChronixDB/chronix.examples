@@ -11,8 +11,21 @@ It uses a central Chronix Server to query the time series.
 To start you have to do a few steps:
 
 ### Prerequisites
-1. JDK 8
+1. JDK 8 (Oracle, OpenJDK see below)
 2. Chronix Server 
+
+#### OpenJDK
+JavaFX is not included in OpenJDK on Linux.
+As a result the following error occurs when starting the application with OpenJDK. 
+```
+Error: Could not find or load main class de.qaware.chronix.examples.exploration.ui.MainRunner
+```
+**Solution**
+- Use Oracle JDK that includes JavaFX
+- Install the missing JavaFX package for OpenJDK, e.g for Ubuntu:
+```bash
+sudo apt-get install openjfx
+```
 
 ### Download and execution
 First ensure that you have a Java 8 runtime environment in your PATH. 
